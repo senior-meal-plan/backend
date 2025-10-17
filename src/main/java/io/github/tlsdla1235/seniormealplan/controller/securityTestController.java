@@ -1,0 +1,41 @@
+package io.github.tlsdla1235.seniormealplan.controller;
+
+
+import io.github.tlsdla1235.seniormealplan.dto.auth.AuthResponse;
+import io.github.tlsdla1235.seniormealplan.dto.auth.LoginRequest;
+import io.github.tlsdla1235.seniormealplan.dto.auth.RegisterRequest;
+import io.github.tlsdla1235.seniormealplan.service.user.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+public class securityTestController {
+    private final AuthService auth;
+
+    public securityTestController(AuthService auth) { this.auth = auth; }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
+        try {
+            auth.register(req);   // 모든 값이 req에 들어옴
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(409).body(Map.of("error", "데이터 제약조건 위반"));
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req){
+        return ResponseEntity.ok(auth.login(req));
+    }
+}

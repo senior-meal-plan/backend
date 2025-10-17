@@ -1,6 +1,7 @@
 package io.github.tlsdla1235.seniormealplan.domain;
 
 
+import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Role;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.UserGenderType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,6 +21,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Integer userId;
+
+
+    @Column(name = "user_input_id" , nullable = false, unique = true)
+    private String userInputId;
+
+    @Column(name = "password", length = 100, nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", length = 20, nullable = false)
+    private Role role = Role.USER;
 
     @Column(name = "user_name", nullable = false) // nullable=false는 NOT NULL 제약조건
     private String userName;
@@ -43,6 +55,7 @@ public class User {
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
+        if (this.role == null) this.role = Role.USER;
     }
 }
 

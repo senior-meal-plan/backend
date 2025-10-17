@@ -28,6 +28,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
@@ -36,6 +38,13 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'me.paulschwarz:spring-dotenv:3.0.0'
 	implementation 'io.github.cdimascio:dotenv-java:2.2.4'
+	// JWT (jjwt 0.12.x)
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+	runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.12.5'
+	runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.12.5' // JSON 직렬화
+
+	// BCrypt
+	implementation 'org.springframework.security:spring-security-crypto'
 }
 
 tasks.named('test') {
