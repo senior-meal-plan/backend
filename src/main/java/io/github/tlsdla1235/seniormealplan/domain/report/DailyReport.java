@@ -26,9 +26,24 @@ public class DailyReport extends Report {
     @Column(name = "total_fat")
     private BigDecimal totalFat;
 
+    @Column(name = "total_calcium")
+    private BigDecimal totalCalcium;
+
     @Lob
+    @Column(name = "summary")
     private String summary;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "severity")
     private Severity severity;
+
+    // 점수 필드들
+    @Column(name = "pro_score")
+    private BigDecimal proScore;
+
+    @Column(name = "cal_score")
+    private BigDecimal calScore;
+
+    @Column(name = "fat_score")
+    private BigDecimal fatScore;
 }

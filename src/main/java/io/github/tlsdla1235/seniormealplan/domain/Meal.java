@@ -59,9 +59,6 @@ public class Meal {
     @Column(name = "memo")
     private String memo;
 
-    @Column(name = "rating")
-    private Integer rating;
-
     @Column(name = "photo_url")
     private String photoUrl;
 

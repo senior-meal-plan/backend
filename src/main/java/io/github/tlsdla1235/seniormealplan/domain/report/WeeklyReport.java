@@ -40,8 +40,8 @@ public class WeeklyReport extends Report {
     @Enumerated(EnumType.STRING)
     private Severity severity;
 
-    @Column(name = "summary_score")
-    private Integer summaryScore;
+//    @Column(name = "summary_score")
+//    private Integer summaryScore;
 
     // 'something_to_graph' 컬럼은 아직 추가 x 어떤 느낌인지 논의를 더 해보고 구현하겠습니다.
 }

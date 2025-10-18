@@ -1,4 +1,4 @@
-package io.github.tlsdla1235.seniormealplan.domain.preference;
+package io.github.tlsdla1235.seniormealplan.domain.preference.legacy;
 
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import jakarta.persistence.*;
