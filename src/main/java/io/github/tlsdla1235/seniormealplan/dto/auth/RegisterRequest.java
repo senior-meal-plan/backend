@@ -26,5 +26,8 @@ public record RegisterRequest(
         BigDecimal userHeight,           // ★ 필수 (예: 170.5)
 
         @NotNull @DecimalMin("0.0") @Digits(integer = 3, fraction = 2)
-        BigDecimal userWeight            // ★ 필수 (예: 65.0)
+        BigDecimal userWeight,            // ★ 필수 (예: 65.0)
+
+        @NotNull
+        Integer userAge
 ) {}

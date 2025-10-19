@@ -16,6 +16,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
+import io.jsonwebtoken.Claims;
+
+
 
 @Component
 public class JwtService {
@@ -49,19 +52,42 @@ public class JwtService {
                 .getSubject();
     }
 
-    public boolean isValid(String token, UserDetails user) {
+    public Integer extractSubAsUserId(String token) {
+        return Integer.valueOf(extractSubject(token));
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)   // 0.12.x API
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public Integer extractUid(String token) {
+        Object v = parseClaims(token).get("uid");
+        if (v == null) return null;
+        if (v instanceof Integer i) return i;
+        if (v instanceof Long l)    return Math.toIntExact(l);
+        return Integer.valueOf(String.valueOf(v));
+    }
+
+    public String extractUin(String token) {
+        Object v = parseClaims(token).get("uin");
+        return v == null ? null : String.valueOf(v);
+    }
+
+    public String extractRole(String token) {
+        Object v = parseClaims(token).get("role");
+        return v == null ? null : String.valueOf(v);
+    }
+
+    public boolean isValid(String token) {
         try {
-            var payload = Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-            return user.getUsername().equals(payload.getSubject())
-                    && payload.getExpiration().after(new Date());
-        } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            return false;
-        } catch (io.jsonwebtoken.JwtException e) { // 서명 불일치/변조 등
-            return false;
+            var payload = parseClaims(token); // 서명 검증 포함
+            return payload.getExpiration().after(new Date());
+        } catch (io.jsonwebtoken.JwtException e) {
+            return false; // 변조/만료 등
         }
     }
 

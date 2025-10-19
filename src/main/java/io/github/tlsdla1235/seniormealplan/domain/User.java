@@ -36,6 +36,9 @@ public class User {
     @Column(name = "user_name", nullable = false) // nullable=false는 NOT NULL 제약조건
     private String userName;
 
+    @Column(name= "age", nullable = false)
+    private Integer age;
+
     @Column(name = "created_at", updatable = false) // updatable=false는 한번 생성되면 수정되지 않음
     private LocalDateTime createdAt;
 

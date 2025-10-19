@@ -40,6 +40,7 @@ public class AuthService {
         u.setUserGender(req.userGender());     // ★ 클라이언트 전달값 사용
         u.setUserHeight(req.userHeight());
         u.setUserWeight(req.userWeight());
+        u.setAge(req.userAge());
         repo.save(u); // createdAt은 @PrePersist가 채움
     }
 
@@ -54,8 +55,12 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자"));
 
         String token = jwt.generateToken(
-                u.getUserInputId(),              // subject
-                Map.of("role", u.getRole().name())
+                String.valueOf(u.getUserId()),
+                Map.of(
+                        "uid",  u.getUserId(),
+                        "uin",  u.getUserInputId(),
+                        "role", u.getRole().name()
+                )
         );
         return new AuthResponse(token);
     }
