@@ -3,35 +3,49 @@ package io.github.tlsdla1235.seniormealplan.service.user;
 import io.github.tlsdla1235.seniormealplan.config.JwtService;
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Role;
+import io.github.tlsdla1235.seniormealplan.domain.preference.HealthTopic;
+import io.github.tlsdla1235.seniormealplan.domain.preference.UserSelectedTopic;
 import io.github.tlsdla1235.seniormealplan.dto.auth.AuthResponse;
 import io.github.tlsdla1235.seniormealplan.dto.auth.LoginRequest;
 import io.github.tlsdla1235.seniormealplan.dto.auth.RegisterRequest;
+import io.github.tlsdla1235.seniormealplan.repository.HealthTopicRepository;
 import io.github.tlsdla1235.seniormealplan.repository.UserRepository;
+import io.github.tlsdla1235.seniormealplan.repository.UserSelectedTopicRepository;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class AuthService {
     private final UserRepository repo;
     private final PasswordEncoder encoder;
     private final AuthenticationManager authManager;
     private final JwtService jwt;
+    private final UserSelectedTopicRepository userSelectedRepo;
+    private final HealthTopicRepository healthRepo;
 
-    public AuthService(UserRepository r, PasswordEncoder e,
-                       AuthenticationManager m, JwtService j) {
-        this.repo = r; this.encoder = e; this.authManager = m; this.jwt = j;
-    }
+//    public AuthService(UserRepository r, PasswordEncoder e,
+//                       AuthenticationManager m, JwtService j, UserSelectedTopicRepository t) {
+//        this.repo = r; this.encoder = e; this.authManager = m; this.jwt = j; this.topicRepo = t;
+//    }
 
     public void register(RegisterRequest req) {
         // userInputId 중복 체크
         if (repo.existsByUserInputId(req.userInputId())) {
             throw new IllegalArgumentException("이미 가입된 사용자 ID");
         }
+        log.info(req.userSelectedTopic().toString());
+
         var u = new io.github.tlsdla1235.seniormealplan.domain.User();
         u.setUserInputId(req.userInputId());
         u.setPassword(encoder.encode(req.password()));
@@ -42,6 +56,24 @@ public class AuthService {
         u.setUserWeight(req.userWeight());
         u.setAge(req.userAge());
         repo.save(u); // createdAt은 @PrePersist가 채움
+
+        List<String> topicNames = req.userSelectedTopic();
+        if (!topicNames.isEmpty()) {
+            List<HealthTopic> foundTopics = healthRepo.findByNameIn(topicNames);
+            if (foundTopics.size() != topicNames.size()) {
+                List<String> notFoundNames = topicNames.stream()
+                        .filter(name -> foundTopics.stream().noneMatch(t -> t.getName().equals(name)))
+                        .toList();
+                throw new IllegalArgumentException("존재하지 않는 건강 토픽이 포함되어 있습니다: " + notFoundNames);
+            }
+            List<UserSelectedTopic> topicsToSave = foundTopics.stream()
+                    .map(topic -> new UserSelectedTopic(u, topic))
+                    .collect(Collectors.toList());
+            userSelectedRepo.saveAll(topicsToSave);
+            log.info("사용자 '{}'의 건강 토픽 {}개가 성공적으로 저장되었습니다.", u.getUserInputId(), topicsToSave.size());
+        }
+
+
     }
 
     public AuthResponse login(LoginRequest req) {

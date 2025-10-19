@@ -8,6 +8,7 @@ import io.github.tlsdla1235.seniormealplan.domain.enumPackage.UserGenderType;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record RegisterRequest(
         @NotBlank @Size(min = 3, max = 50)
@@ -29,5 +30,8 @@ public record RegisterRequest(
         BigDecimal userWeight,            // ★ 필수 (예: 65.0)
 
         @NotNull
-        Integer userAge
+        Integer userAge,
+
+        @NotNull
+        List<String> userSelectedTopic
 ) {}

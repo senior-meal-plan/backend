@@ -34,6 +34,11 @@ public class UserSelectedTopic {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    public UserSelectedTopic(User user, HealthTopic healthTopic) {
+        this.user = user;
+        this.healthTopic = healthTopic;
+    }
+
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
