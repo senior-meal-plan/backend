@@ -33,14 +33,8 @@ public class AuthService {
     private final JwtService jwt;
     private final UserSelectedTopicRepository userSelectedRepo;
     private final HealthTopicRepository healthRepo;
-
-//    public AuthService(UserRepository r, PasswordEncoder e,
-//                       AuthenticationManager m, JwtService j, UserSelectedTopicRepository t) {
-//        this.repo = r; this.encoder = e; this.authManager = m; this.jwt = j; this.topicRepo = t;
-//    }
-
+    private final HealthMetricService healthMetricService;
     public void register(RegisterRequest req) {
-        // userInputId 중복 체크
         if (repo.existsByUserInputId(req.userInputId())) {
             throw new IllegalArgumentException("이미 가입된 사용자 ID");
         }
@@ -73,7 +67,7 @@ public class AuthService {
             log.info("사용자 '{}'의 건강 토픽 {}개가 성공적으로 저장되었습니다.", u.getUserInputId(), topicsToSave.size());
         }
 
-
+        healthMetricService.init_HealthMetricService(u);
     }
 
     public AuthResponse login(LoginRequest req) {
