@@ -1,7 +1,10 @@
 package io.github.tlsdla1235.seniormealplan.service.admin;
 
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import io.github.tlsdla1235.seniormealplan.dto.s3dto.PresignedUrlResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -47,5 +53,51 @@ public class S3UploadService {
             log.error("File upload failed", e);
             throw new RuntimeException("S3 file upload failed", e);
         }
+    }
+
+    /**
+     * 클라이언트가 S3에 직접 파일을 업로드할 수 있는 Pre-signed URL을 생성합니다.
+     * @param originalFileName 클라이언트가 업로드하려는 원본 파일 이름
+     * @return Pre-signed URL과 S3에 저장될 고유 파일 이름이 담긴 DTO
+     */
+    public PresignedUrlResponse generatePresignedUrl(String originalFileName) {
+        // 1. S3에 저장될 파일 이름이 중복되지 않도록 고유한 이름을 생성합니다.
+        String uniqueFileName = createUniqueFileName(originalFileName);
+
+        // 2. URL의 유효 시간을 설정합니다. (여기서는 5분으로 설정)
+        Date expiration = new Date();
+        long expTimeMillis = expiration.getTime();
+        expTimeMillis += 1000 * 60 * 5; // 5분
+        expiration.setTime(expTimeMillis);
+
+        // 3. AWS SDK를 사용하여 Pre-signed URL 생성 요청을 만듭니다.
+        GeneratePresignedUrlRequest presignedUrlRequest =
+                new GeneratePresignedUrlRequest(bucket, uniqueFileName)
+                        .withMethod(HttpMethod.PUT) // PUT 메서드로 업로드하도록 지정
+                        .withExpiration(expiration);
+
+        // 4. URL을 생성하고 DTO에 담아 반환합니다.
+        URL url = amazonS3Client.generatePresignedUrl(presignedUrlRequest);
+        log.info("Pre-signed URL for {} generated: {}", uniqueFileName, url);
+
+        return new PresignedUrlResponse(url.toString(), uniqueFileName);
+    }
+
+    /**
+     * S3에 저장된 파일의 영구적인 URL을 조회합니다.
+     * @param uniqueFileName S3에 저장된 고유 파일 이름
+     * @return DB에 저장하거나 클라이언트에게 보여줄 최종 URL
+     */
+    public String getFileUrl(String uniqueFileName) {
+        return amazonS3Client.getUrl(bucket, uniqueFileName).toString();
+    }
+
+    /**
+     * 파일 이름의 중복을 피하기 위해 UUID를 사용하여 고유한 파일 이름을 생성합니다.
+     * @param originalFileName 원본 파일 이름
+     * @return "UUID_원본파일이름" 형식의 새로운 파일 이름
+     */
+    private String createUniqueFileName(String originalFileName) {
+        return UUID.randomUUID().toString() + "_" + originalFileName;
     }
 }
