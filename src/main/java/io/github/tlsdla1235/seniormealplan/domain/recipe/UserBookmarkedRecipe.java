@@ -2,15 +2,15 @@ package io.github.tlsdla1235.seniormealplan.domain.recipe;
 
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_bookmarked_recipes")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class UserBookmarkedRecipe {
 
     @Id

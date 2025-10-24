@@ -5,8 +5,10 @@ import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Role;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.UserGenderType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@SQLRestriction("is_deleted = false")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +57,16 @@ public class User {
 
     @Column(name = "user_last_login")
     private LocalDateTime userLastLogin;
+
+    @Column(name = "last_daily_report_date")
+    private LocalDate lastDailyReportDate; // 마지막 데일리 리포트 작성일
+
+    @Column(name = "last_weekly_report_date")
+    private LocalDate lastWeeklyReportDate; // 마지막 위클리 리포트 작성일
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default // Lombok Builder 사용 시 이 필드를 누락하면 자동으로 기본값을 설정해줌
+    private boolean isDeleted = false; // 필드 선언 시 기본값 false로 초기화
 
     @PrePersist
     public void prePersist() {

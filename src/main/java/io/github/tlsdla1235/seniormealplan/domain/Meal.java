@@ -3,6 +3,7 @@ package io.github.tlsdla1235.seniormealplan.domain;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.MealType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@SQLRestriction("is_deleted = false")
 public class Meal {
 
     @Id
@@ -66,6 +68,10 @@ public class Meal {
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default // Lombok Builder 사용 시 이 필드를 누락하면 자동으로 기본값을 설정해줌
+    private boolean isDeleted = false; // 필드 선언 시 기본값 false로 초기화
 
     @PrePersist
     public void prePersist() {
