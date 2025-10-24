@@ -2,8 +2,7 @@ package io.github.tlsdla1235.seniormealplan.domain;
 
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.MealType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,7 +14,10 @@ import java.util.List;
 @Entity
 @Table(name = "meals")
 @Getter
+@Setter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class Meal {
 
     @Id

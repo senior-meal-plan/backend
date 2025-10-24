@@ -4,9 +4,7 @@ package io.github.tlsdla1235.seniormealplan.domain;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Role;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.UserGenderType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,6 +14,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
