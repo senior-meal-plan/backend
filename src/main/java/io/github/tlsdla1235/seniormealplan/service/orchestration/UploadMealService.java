@@ -2,14 +2,19 @@ package io.github.tlsdla1235.seniormealplan.service.orchestration;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
+import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealRequestDto;
+import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealCreateRequest;
 import io.github.tlsdla1235.seniormealplan.dto.s3dto.PresignedUrlResponse;
 import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class UploadMealService {
     private final S3UploadService s3UploadService;
     private final MealRepository mealRepository;
+    private final WebClient webClient;
+    @Value("${service.analysis.url}")
+    private String analysisApiUrl; // FastAPI 서버 주소 (application.yml)
+
+    @Value("${service.webhook.callback-url}")
+    private String webhookCallbackUrl; // 우리 웹훅 주소 (application.yml)
+
 
     public PresignedUrlResponse generatePresignedUrl(String originalFileName){
         return s3UploadService.generatePresignedUrl(originalFileName);
@@ -32,5 +44,28 @@ public class UploadMealService {
          */
 
         return meal;
+    }
+
+    @Async
+    public void requestMealAnalysis(Meal meal) {
+        AnalysisMealRequestDto requestDto = new AnalysisMealRequestDto(
+                meal.getMealId(),
+                meal.getPhotoUrl(),
+                webhookCallbackUrl
+        );
+
+        // WebClient를 사용해 FastAPI 서버에 분석 요청
+        webClient.post()
+                .uri(analysisApiUrl)
+                .bodyValue(requestDto)
+                .retrieve()
+                .bodyToMono(Void.class) // 응답은 딱히 필요 없으므로 Void
+                .doOnError(error -> log.error("Failed to request meal analysis", error))
+                .subscribe();
+    }
+
+    @Transactional
+    public void updateMealWithAnalysis(AnalysisMealResultDto analysisMealResultDto) {
+        return;
     }
 }
