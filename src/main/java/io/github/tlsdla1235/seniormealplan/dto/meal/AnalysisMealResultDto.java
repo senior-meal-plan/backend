@@ -7,6 +7,8 @@ public record AnalysisMealResultDto(
         BigDecimal totalKcal,  // 분석된 총 칼로리
         BigDecimal totalProtein,
         BigDecimal totalCarbs,
-        BigDecimal totalFat
+        BigDecimal totalFat,
+        String Summary,
+        String Severity
 ) {
 }

@@ -23,4 +23,19 @@ public class MealReport extends Report {
 
     @Enumerated(EnumType.STRING)
     private Severity severity;
+
+    public MealReport(Meal meal) {
+        if (meal == null || meal.getUser() == null) {
+            throw new IllegalArgumentException("Meal and its User cannot be null");
+        }
+        this.meal = meal;
+        // 부모(Report)의 필드 설정
+        super.setUser(meal.getUser());
+        super.setReportDate(meal.getMealDate()); // Meal에 getMealDate()가 있다고 가정
+    }
+
+    public void updateWithAnalysis(String summary, Severity severity) {
+        this.summary = summary;
+        this.severity = severity;
+    }
 }

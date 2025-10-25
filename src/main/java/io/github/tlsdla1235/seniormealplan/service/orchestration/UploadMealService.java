@@ -2,12 +2,14 @@ package io.github.tlsdla1235.seniormealplan.service.orchestration;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
+import io.github.tlsdla1235.seniormealplan.domain.report.MealReport;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealCreateRequest;
 import io.github.tlsdla1235.seniormealplan.dto.s3dto.PresignedUrlResponse;
 import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
+import io.github.tlsdla1235.seniormealplan.service.report.MealReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +24,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class UploadMealService {
     private final S3UploadService s3UploadService;
     private final MealRepository mealRepository;
+    private final MealReportService mealReportService;
     private final WebClient webClient;
     @Value("${service.analysis.url}")
     private String analysisApiUrl; // FastAPI 서버 주소 (application.yml)
@@ -39,10 +42,10 @@ public class UploadMealService {
         String url = s3UploadService.getFileUrl(uniqueFileName);
         meal.setPhotoUrl(url);
         mealRepository.save(meal);
-        /**todo
-         * ai에게 분석해달라고 하는 서비스 호출
-         */
-
+        log.info("사용자 id {}에 대한 meal이 생성되었습니다. mealid ={}", meal.getUser().getUserId(), meal.getMealId());
+        MealReport mealReport = mealReportService.createPendingMealReport(meal);
+        log.info("사용자 id {}에 대한 mealReport가 생성되었습니다. reportid ={}", meal.getUser().getUserId(), mealReport.getReportId());
+//        requestMealAnalysis(meal);
         return meal;
     }
 
@@ -66,6 +69,8 @@ public class UploadMealService {
 
     @Transactional
     public void updateMealWithAnalysis(AnalysisMealResultDto analysisMealResultDto) {
+
+        mealReportService.updateMealReportWithAnalysis(analysisMealResultDto);
         return;
     }
 }
