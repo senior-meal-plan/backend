@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface HealthTopicRepository extends JpaRepository<HealthTopic, Integer> {
+public interface HealthTopicRepository extends JpaRepository<HealthTopic, Long> {
     List<HealthTopic> findByNameIn(List<String> names);
 }

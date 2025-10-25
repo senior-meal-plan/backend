@@ -17,7 +17,7 @@ public class HealthMetric {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "metric_id")
-    private Integer metricId;
+    private Long metricId;
 
     @OneToOne(fetch = FetchType.LAZY) // User(1) : HealthMetric(1) 관계
     @JoinColumn(name = "user_id")

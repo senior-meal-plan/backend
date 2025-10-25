@@ -29,7 +29,7 @@ public class UploadMealService {
     private final MealReportService mealReportService;
     private final WebClient webClient;
     private final FoodService foodService;
-    @Value("${service.analysis.url}")
+    @Value("${service.meal.analysis.url}")
     private String analysisApiUrl; // FastAPI 서버 주소 (application.yml)
 
     @Value("${service.webhook.callback-url}")

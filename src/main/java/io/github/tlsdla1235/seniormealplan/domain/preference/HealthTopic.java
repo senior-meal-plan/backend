@@ -19,7 +19,7 @@ public class HealthTopic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "topic_id")
-    private Integer topicId;
+    private Long topicId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "topic_type", nullable = false)

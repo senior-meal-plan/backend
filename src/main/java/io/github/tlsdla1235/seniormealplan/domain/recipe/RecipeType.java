@@ -15,7 +15,7 @@ public class RecipeType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "type_id")
-    private Integer typeId;
+    private Long typeId;
 
     @Column(name = "type_name", nullable = false)
     private String typeName;

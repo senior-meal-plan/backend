@@ -24,14 +24,12 @@ public class FoodService {
                 .orElseThrow(() -> new EntityNotFoundException("Meal not found with id: " + resultDto.mealId()));
 
         // 2. 재분석에 대비하여, 기존에 연결된 Food 목록을 모두 제거합니다.
-        // Meal 엔티티의 orphanRemoval = true 옵션 덕분에, 컬렉션에서 clear하면 DB에서도 삭제됩니다.
         meal.getFoods().clear();
 
         // 3. DTO에 포함된 음식 목록(List<AnalyzedFoodDto>)을 순회합니다.
         for (AnalyzedFoodDto foodDto : resultDto.foods()) {
 
             // 4. AnalyzedFoodDto로부터 새로운 Food 엔티티를 생성합니다.
-            //    이때, 관계의 주인인 Food 엔티티에 Meal 객체를 설정해주는 것이 핵심입니다.
             Food newFood = Food.builder()
                     .name(foodDto.name())
                     .kcal(foodDto.kcal())

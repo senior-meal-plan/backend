@@ -20,7 +20,7 @@ public class helloController {
         // 인증 안 됐으면 me == null 이므로 NPE 주의
         if (me == null) return "anonymous";
 
-        Integer userId   = me.userId();        // ← Integer user_id
+        Long userId   = me.userId();        // ← Integer user_id
         String  inputId  = me.userInputId();   // ← user_input_id
         String  role     = me.role();          // ← "USER" 등
         return "uid=" + userId + ", uin=" + inputId + ", role=" + role;

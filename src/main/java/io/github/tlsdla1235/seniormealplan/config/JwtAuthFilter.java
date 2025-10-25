@@ -23,7 +23,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService uds;
 
     public JwtAuthFilter(JwtService j, UserDetailsService u){ this.jwt=j; this.uds=u; }
-    public static record JwtPrincipal(Integer userId, String userInputId, String role) {}
+    public static record JwtPrincipal(Long userId, String userInputId, String role) {}
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -46,7 +46,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
 
                 // 2) 클레임 추출
-                Integer uid = jwt.extractUid(token);     // Integer user_id
+                Long uid = jwt.extractUid(token);     // Integer user_id
                 String  uin = jwt.extractUin(token);     // user_input_id
                 String  role = jwt.extractRole(token);   // 예: "USER"
 

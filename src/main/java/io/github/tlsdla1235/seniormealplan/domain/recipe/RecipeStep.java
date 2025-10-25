@@ -15,14 +15,14 @@ public class RecipeStep {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "step_id")
-    private Integer stepId;
+    private Long stepId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
     @Column(name = "step_no", nullable = false)
-    private Integer stepNo;
+    private Long stepNo;
 
     @Lob
     @Column(nullable = false)

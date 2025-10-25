@@ -16,7 +16,7 @@ public class UserWeeklyRecommendation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recommendation_id")
-    private Integer recommendationId;
+    private Long recommendationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

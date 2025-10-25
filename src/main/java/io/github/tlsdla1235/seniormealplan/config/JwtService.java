@@ -64,12 +64,11 @@ public class JwtService {
                 .getPayload();
     }
 
-    public Integer extractUid(String token) {
+    public Long extractUid(String token) {
         Object v = parseClaims(token).get("uid");
         if (v == null) return null;
-        if (v instanceof Integer i) return i;
-        if (v instanceof Long l)    return Math.toIntExact(l);
-        return Integer.valueOf(String.valueOf(v));
+        if (v instanceof Long i) return i;
+        return Long.valueOf(String.valueOf(v));
     }
 
     public String extractUin(String token) {
