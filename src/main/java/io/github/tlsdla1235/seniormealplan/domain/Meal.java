@@ -1,5 +1,7 @@
 package io.github.tlsdla1235.seniormealplan.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.MealType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,10 +31,12 @@ public class Meal {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
 
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MealFood> mealFoods = new ArrayList<>();
+    @JsonManagedReference("meal-food")
+    private List<Food> foods = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "meal_type", nullable = false)

@@ -9,7 +9,9 @@ import io.github.tlsdla1235.seniormealplan.dto.meal.MealCreateRequest;
 import io.github.tlsdla1235.seniormealplan.dto.s3dto.PresignedUrlResponse;
 import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
+import io.github.tlsdla1235.seniormealplan.service.food.FoodService;
 import io.github.tlsdla1235.seniormealplan.service.report.MealReportService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ public class UploadMealService {
     private final MealRepository mealRepository;
     private final MealReportService mealReportService;
     private final WebClient webClient;
+    private final FoodService foodService;
     @Value("${service.analysis.url}")
     private String analysisApiUrl; // FastAPI 서버 주소 (application.yml)
 
@@ -69,8 +72,17 @@ public class UploadMealService {
 
     @Transactional
     public void updateMealWithAnalysis(AnalysisMealResultDto analysisMealResultDto) {
+        Meal meal = mealRepository.findById(analysisMealResultDto.mealId())
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 식사 데이터를 찾을 수 없습니다: " + analysisMealResultDto.mealId()));
+        meal.setTotalKcal(analysisMealResultDto.totalKcal());
+        meal.setTotalCalcium(analysisMealResultDto.totalCalcium());
+        meal.setTotalCarbs(analysisMealResultDto.totalCarbs());
+        meal.setTotalProtein(analysisMealResultDto.totalProtein());
+        meal.setTotalFat(analysisMealResultDto.totalFat());
 
         mealReportService.updateMealReportWithAnalysis(analysisMealResultDto);
+        foodService.createFoodsFromAnalysisAndLinkToMeal(analysisMealResultDto);
+
         return;
     }
 }

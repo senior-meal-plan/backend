@@ -10,6 +10,8 @@ import org.hibernate.annotations.SQLRestriction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="users")
@@ -67,6 +69,9 @@ public class User {
     @Column(name = "is_deleted", nullable = false)
     @Builder.Default // Lombok Builder 사용 시 이 필드를 누락하면 자동으로 기본값을 설정해줌
     private boolean isDeleted = false; // 필드 선언 시 기본값 false로 초기화
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Meal> meals = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

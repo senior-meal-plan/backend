@@ -1,6 +1,7 @@
 package io.github.tlsdla1235.seniormealplan.dto.meal;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record AnalysisMealResultDto(
         Long mealId,           // 어떤 식단에 대한 분석 결과인지 식별자
@@ -8,7 +9,9 @@ public record AnalysisMealResultDto(
         BigDecimal totalProtein,
         BigDecimal totalCarbs,
         BigDecimal totalFat,
+        BigDecimal totalCalcium,
         String Summary,
-        String Severity
+        String Severity,
+        List<AnalyzedFoodDto> foods
 ) {
 }
