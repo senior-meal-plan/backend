@@ -12,4 +12,5 @@ public interface DailyReportRepository extends JpaRepository<DailyReport, Long> 
 
     Optional<DailyReport> findByUserAndReportDate(User user, LocalDate reportDate);
 
+    List<DailyReport> findByUserAndReportDateBetween(User user, LocalDate startDate, LocalDate endDate);
 }

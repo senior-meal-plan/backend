@@ -4,15 +4,18 @@ import io.github.tlsdla1235.seniormealplan.domain.Meal;
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealResponseDto;
+import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.MealForWeeklyDto;
 import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,5 +69,24 @@ public class MealService {
         List<LocalDate> mealDates = mealRepository.findDistinctMealDatesByUser(user);
         log.info("userid:{}에 대한 getAllMealDateFromUser 반환 결과 : {}", user.getUserId(), mealDates);
         return mealDates;
+    }
+
+    public List<MealForWeeklyDto> getMealsForLastWeek(User user, LocalDate date) {
+        // 1. 지난주의 월요일과 일요일 날짜 계산
+        LocalDate lastMonday = date.with(DayOfWeek.MONDAY);
+        LocalDate lastSunday = date.with(DayOfWeek.SUNDAY);
+
+
+        // 2. Repository를 통해 해당 기간의 식사 기록을 조회
+        // (MealRepository에 해당 메서드가 있다고 가정)
+        List<Meal> meals = mealRepository.findByUserAndMealDateBetweenWithFoods(user, lastMonday, lastSunday);
+
+        // 3. DTO 리스트로 변환하여 반환 (MealForWeeklyDto::fromMeal 사용)
+        List<MealForWeeklyDto> mealDtos = meals.stream()
+                .map(MealForWeeklyDto::fromMeal) // MealResponseDto::from -> MealForWeeklyDto::fromMeal
+                .collect(Collectors.toList());
+
+        log.info("사용자 id:{}에 대한 지난주 식사(getMealsForLastWeek) 결과값: {}", user.getUserId(), mealDtos);
+        return mealDtos;
     }
 }

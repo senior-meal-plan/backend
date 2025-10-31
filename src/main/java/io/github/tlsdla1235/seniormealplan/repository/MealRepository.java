@@ -16,4 +16,7 @@ public interface MealRepository extends JpaRepository<Meal, Long> {
 
     @Query("SELECT DISTINCT m.mealDate FROM Meal m WHERE m.user = :user ORDER BY m.mealDate DESC")
     List<LocalDate> findDistinctMealDatesByUser(@Param("user") User user);
+
+    @Query("SELECT m FROM Meal m JOIN FETCH m.foods f WHERE m.user = :user AND m.mealDate BETWEEN :startDate AND :endDate ORDER BY m.mealDate, m.mealType")
+    List<Meal> findByUserAndMealDateBetweenWithFoods(@Param("user") User user, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

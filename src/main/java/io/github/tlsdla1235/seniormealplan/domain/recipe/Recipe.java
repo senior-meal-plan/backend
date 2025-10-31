@@ -2,9 +2,7 @@ package io.github.tlsdla1235.seniormealplan.domain.recipe;
 
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Difficulty;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +10,10 @@ import java.util.List;
 @Entity
 @Table(name = "recipes")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class Recipe {
 
     @Id

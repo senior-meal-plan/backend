@@ -28,10 +28,6 @@ public class s3Controller {
     @PostMapping("/complete")
     public ResponseEntity<String> uploadComplete(@RequestBody UploadCompleteRequest request) {
         String finalUrl = s3UploadService.getFileUrl(request.uniqueFileName());
-
-        // 여기서 finalUrl을 다른 서비스(예: PostService)에 넘겨 DB에 저장하는 로직 수행
-        // postService.saveImageUrl(finalUrl);
-
         log.info("File upload complete. Stored URL: {}", finalUrl);
         return ResponseEntity.ok(finalUrl);
     }

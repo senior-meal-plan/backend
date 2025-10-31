@@ -8,6 +8,7 @@ import io.github.tlsdla1235.seniormealplan.domain.report.DailyReport;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportResponseDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealRequestDto;
+import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.DailyReportsForWeeklyReportDto;
 import io.github.tlsdla1235.seniormealplan.repository.DailyReportRepository;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,8 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -103,5 +107,24 @@ public class DailyReportService {
         DailyReportResponseDto responseDto = DailyReportResponseDto.fromDailyReport(dailyReport);
         log.info("{}", responseDto);
         return responseDto;
+    }
+
+    public List<DailyReportsForWeeklyReportDto> getCompletedReportsForLastWeek(User user, LocalDate date) {
+        // 2. '지난주'의 월요일과 일요일 날짜 계산
+
+        // 지난주 월요일: (오늘 날짜에서 1주일을 뺀 날짜)가 포함된 주의 월요일
+        LocalDate lastMonday = date.with(DayOfWeek.MONDAY);
+        // 지난주 일요일: 계산된 월요일에서 6일을 더함
+        LocalDate lastSunday = date.with(DayOfWeek.SUNDAY);
+
+        // 3. Repository를 통해 해당 기간의 DailyReport 엔티티 조회
+        List<DailyReport> reports = dailyReportRepository
+                .findByUserAndReportDateBetween(user, lastMonday, lastSunday);
+
+        // 4. Stream을 사용하여 DTO 리스트로 변환
+        return reports.stream()
+                .map(DailyReportsForWeeklyReportDto::from) // DTO 변환
+                .filter(Objects::nonNull)                  // null이 아닌 것만 필터링
+                .collect(Collectors.toList());             // 리스트로 수집
     }
 }

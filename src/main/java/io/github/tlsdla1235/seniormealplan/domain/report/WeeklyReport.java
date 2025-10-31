@@ -1,6 +1,7 @@
 package io.github.tlsdla1235.seniormealplan.domain.report;
 
 
+import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Severity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -22,9 +23,6 @@ public class WeeklyReport extends Report {
     @Column(name = "week_end")
     private LocalDate weekEnd;
 
-    @Column(name = "avg_kcal")
-    private BigDecimal avgKcal;
-
     @Lob
     @Column(name = "summary_good_point")
     private String summaryGoodPoint;
@@ -40,8 +38,12 @@ public class WeeklyReport extends Report {
     @Enumerated(EnumType.STRING)
     private Severity severity;
 
-//    @Column(name = "summary_score")
-//    private Integer summaryScore;
+    public WeeklyReport(User user, LocalDate weekStart, LocalDate weekEnd) {
+        super.setUser(user);
+        super.setReportDate(weekEnd);
 
-    // 'something_to_graph' 컬럼은 아직 추가 x 어떤 느낌인지 논의를 더 해보고 구현하겠습니다.
+
+        this.weekStart = weekStart;
+        this.weekEnd = weekEnd;
+    }
 }

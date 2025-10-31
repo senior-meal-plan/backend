@@ -1,8 +1,12 @@
 package io.github.tlsdla1235.seniormealplan.controller.admin;
 
+import io.github.tlsdla1235.seniormealplan.domain.recipe.Recipe;
+import io.github.tlsdla1235.seniormealplan.dto.recipe.RecipeDto;
 import io.github.tlsdla1235.seniormealplan.dto.tempdto.HealthTopicCreateRequestDto;
+import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.WeeklyReportGenerateRequestDto;
 import io.github.tlsdla1235.seniormealplan.service.admin.AdminService;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
+import io.github.tlsdla1235.seniormealplan.service.recipe.RecipeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +21,17 @@ import java.time.format.DateTimeFormatter;
 public class HealthTopicController {
     private final AdminService adminService;
     private final S3UploadService s3UploadService;
+    private final RecipeService recipeService;
 
     @PostMapping("/health-topics")
     public ResponseEntity<Void> createHealthTopic(@RequestBody HealthTopicCreateRequestDto requestDto) {
         adminService.createHealthTopic(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/recipe")
+    public ResponseEntity<Void> createRecipe(@RequestBody RecipeDto recipe) {
+        recipeService.save(recipe);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -38,4 +49,8 @@ public class HealthTopicController {
         return ResponseEntity.ok(responseMessage);
     }
 
+    @GetMapping("/tempmap")
+    public ResponseEntity<String> tempmap(@RequestBody WeeklyReportGenerateRequestDto requestDto) {
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 }

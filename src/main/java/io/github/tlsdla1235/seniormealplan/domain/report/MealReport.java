@@ -31,7 +31,7 @@ public class MealReport extends Report {
         this.meal = meal;
         // 부모(Report)의 필드 설정
         super.setUser(meal.getUser());
-        super.setReportDate(meal.getMealDate()); // Meal에 getMealDate()가 있다고 가정
+        super.setReportDate(meal.getMealDate());
     }
 
     public void updateWithAnalysis(String summary, Severity severity) {
