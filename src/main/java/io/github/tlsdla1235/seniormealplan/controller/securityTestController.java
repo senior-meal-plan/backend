@@ -5,22 +5,21 @@ import io.github.tlsdla1235.seniormealplan.dto.auth.AuthResponse;
 import io.github.tlsdla1235.seniormealplan.dto.auth.LoginRequest;
 import io.github.tlsdla1235.seniormealplan.dto.auth.RegisterRequest;
 import io.github.tlsdla1235.seniormealplan.service.user.AuthService;
+import io.github.tlsdla1235.seniormealplan.service.user.UserTopicService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class securityTestController {
     private final AuthService auth;
-
-    public securityTestController(AuthService auth) { this.auth = auth; }
+    private final UserTopicService userSelectedTopicService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
@@ -38,4 +37,6 @@ public class securityTestController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req){
         return ResponseEntity.ok(auth.login(req));
     }
+
+
 }

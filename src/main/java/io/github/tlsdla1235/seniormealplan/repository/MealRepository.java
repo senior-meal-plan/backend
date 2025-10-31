@@ -13,4 +13,7 @@ import java.util.List;
 public interface MealRepository extends JpaRepository<Meal, Long> {
     @Query("SELECT m FROM Meal m LEFT JOIN FETCH m.foods WHERE m.user = :user AND m.mealDate = :date")
     List<Meal> findByUserAndMealDateWithFoods(@Param("user") User user, @Param("date") LocalDate date);
+
+    @Query("SELECT m FROM Meal m LEFT JOIN FETCH m.foods WHERE m.user = :userId AND m.mealDate = :date")
+    List<Meal> findByUserIdAndMealDateWithFoods(@Param("userId") Long userId, @Param("date") LocalDate date);
 }

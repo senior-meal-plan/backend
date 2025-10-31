@@ -70,6 +70,36 @@ public class Meal {
     @Column(name = "photo_url")
     private String photoUrl;
 
+    @Column(name = "is_dairy_intake", nullable = false)
+    @Builder.Default
+    private boolean isDairyIntake = false;
+
+    @Column(name = "is_vitamin_c_intake", nullable = false)
+    @Builder.Default
+    private boolean isVitaminCIntake = false;
+
+    @Column(name = "is_vitamin_b_intake", nullable = false)
+    @Builder.Default
+    private boolean isVitaminBIntake = false;
+
+    @Column(name = "is_fish_intake", nullable = false)
+    @Builder.Default
+    private boolean isFishIntake = false;
+
+    @Column(name = "is_nuts_intake", nullable = false)
+    @Builder.Default
+    private boolean isNutsIntake = false;
+
+    @Column(name = "is_vegetable_oil_intake", nullable = false)
+    @Builder.Default
+    private boolean isVegetableOilIntake = false;
+
+    @Column(name = "is_unrefined_carbs_intake", nullable = false)
+    @Builder.Default
+    private boolean isUnrefinedCarbsIntake = false;
+
+
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

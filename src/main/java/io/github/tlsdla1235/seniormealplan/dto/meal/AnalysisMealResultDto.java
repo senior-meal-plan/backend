@@ -12,6 +12,24 @@ public record AnalysisMealResultDto(
         BigDecimal totalCalcium,
         String Summary,
         String Severity,
+
+//        추가된 항목
+        
+        BigDecimal averageSaturatedFatPercentKcal, // 포화지방 (%kcal) - 식단 전체 평균
+        BigDecimal totalUnsaturatedFat,          // 불포화지방 (g)
+        BigDecimal totalDietaryFiber,            // 식이섬유 (g)
+        BigDecimal totalSodium,                  // 나트륨 (mg)
+        BigDecimal totalAddedSugarKcal,          // 첨가당 (kcal)
+        BigDecimal totalProcessedMeatGram,       // 가공육 (g)
+        BigDecimal totalVitaminD_IU,             // 비타민 D (UI)
+        boolean isDairyIntake,
+        boolean isVitaminCIntake,
+        boolean isVitaminBIntake,
+        boolean isFishIntake,
+        boolean isNutsIntake,
+        boolean isVegetableOilIntake,
+        boolean isUnrefinedCarbsIntake,
+
         List<AnalyzedFoodDto> foods
 ) {
 }

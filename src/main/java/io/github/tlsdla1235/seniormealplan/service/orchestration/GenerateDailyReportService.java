@@ -70,9 +70,23 @@ public class GenerateDailyReportService {
                         meal.getPhotoUrl(),
                         meal.getFoods().stream()
                                 .map(food -> new AnalyzedFoodDto(
-                                        food.getName(), food.getKcal(), food.getProtein(),
-                                        food.getCarbs(), food.getFat(), food.getCalcium(),
-                                        food.getServingSize()
+                                        food.getName(),
+                                        food.getKcal(),
+                                        food.getProtein(),
+                                        food.getCarbs(),
+                                        food.getFat(),
+                                        food.getCalcium(),
+                                        food.getServingSize(),
+                                        food.getSaturatedFatPercentKcal(),
+                                        food.getUnsaturatedFat(),
+                                        food.getDietaryFiber(),
+                                        food.getSodium(),
+                                        food.getAddedSugarKcal(),
+                                        food.getProcessedMeatGram(),
+                                        food.getVitaminD_IU(),
+                                        food.isVegetable(),
+                                        food.isFruit(),
+                                        food.isFried()
                                 ))
                                 .toList()
                 ))

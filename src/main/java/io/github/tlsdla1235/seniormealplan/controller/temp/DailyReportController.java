@@ -2,6 +2,7 @@ package io.github.tlsdla1235.seniormealplan.controller.temp;
 
 import io.github.tlsdla1235.seniormealplan.config.JwtAuthFilter;
 import io.github.tlsdla1235.seniormealplan.domain.User;
+import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisRequestDto;
 import io.github.tlsdla1235.seniormealplan.service.orchestration.GenerateDailyReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,12 @@ public class DailyReportController {
         );
     }
 
-
+    @PostMapping("/temp")
+    public ResponseEntity<String> generateTempReport(
+            @RequestBody(required = false)DailyReportAnalysisRequestDto temp
+            )
+    {
+        return ResponseEntity.accepted().body("good");
+    }
 
 }

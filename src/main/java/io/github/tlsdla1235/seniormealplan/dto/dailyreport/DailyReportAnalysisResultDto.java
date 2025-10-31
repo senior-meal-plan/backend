@@ -15,8 +15,14 @@ public record DailyReportAnalysisResultDto(
         BigDecimal totalCalcium,
         String summary,
         String severity,       // Enum으로 바로 받기보다 String으로 받아 안전하게 변환
-        BigDecimal proScore,
-        BigDecimal calScore,
-        BigDecimal fatScore
+
+        BigDecimal summarizeScore,
+        BigDecimal macularDegenerationScore,
+        BigDecimal hypertensionScore,
+        BigDecimal myocardialInfarctionScore,
+        BigDecimal sarcopeniaScore,
+        BigDecimal hyperlipidemiaScore,
+        BigDecimal boneDiseaseScore
+
 ) {
 }

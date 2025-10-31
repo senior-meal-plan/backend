@@ -41,14 +41,27 @@ public class DailyReport extends Report {
     private Severity severity;
 
     // 점수 필드들
-    @Column(name = "pro_score")
-    private BigDecimal proScore;
+    @Column(name = "summarize_score")
+    private BigDecimal summarizeScore;
 
-    @Column(name = "cal_score")
-    private BigDecimal calScore;
+    @Column(name = "macular_degeneration_score")
+    private BigDecimal macularDegenerationScore; // 황반변성 점수
 
-    @Column(name = "fat_score")
-    private BigDecimal fatScore;
+    @Column(name = "hypertension_score")
+    private BigDecimal hypertensionScore; // 고혈압 점수
+
+    @Column(name = "myocardial_infarction_score")
+    private BigDecimal myocardialInfarctionScore; // 심근경색 점수
+
+    @Column(name = "sarcopenia_score")
+    private BigDecimal sarcopeniaScore; // 근감소증 점수
+
+    @Column(name = "hyperlipidemia_score")
+    private BigDecimal hyperlipidemiaScore; // 고지혈증 점수
+
+    @Column(name = "bone_disease_score")
+    private BigDecimal boneDiseaseScore; // 뼈질환 점수
+
 
     public DailyReport(User user, LocalDate reportDate) {
         super.setUser(user);
@@ -59,8 +72,13 @@ public class DailyReport extends Report {
     public void updateWithAnalysis(BigDecimal totalKcal, BigDecimal totalProtein,
                                    BigDecimal totalCarbs, BigDecimal totalFat,
                                    BigDecimal totalCalcium, String summary,
-                                   Severity severity, BigDecimal proScore,
-                                   BigDecimal calScore, BigDecimal fatScore) {
+                                   Severity severity, BigDecimal summarizeScore,
+                                   BigDecimal macularDegenerationScore,
+                                   BigDecimal hyperlipidemiaScore,
+                                   BigDecimal myocardialInfarctionScore,
+                                   BigDecimal sarcopeniaScore,
+                                   BigDecimal boneDiseaseScore,
+                                   BigDecimal hypertensionScore) {
         this.totalKcal = totalKcal;
         this.totalProtein = totalProtein;
         this.totalCarbs = totalCarbs;
@@ -68,9 +86,13 @@ public class DailyReport extends Report {
         this.totalCalcium = totalCalcium;
         this.summary = summary;
         this.severity = severity;
-        this.proScore = proScore;
-        this.calScore = calScore;
-        this.fatScore = fatScore;
+        this.summarizeScore = summarizeScore;
+        this.macularDegenerationScore = macularDegenerationScore;
+        this.hypertensionScore = hypertensionScore;
+        this.myocardialInfarctionScore = myocardialInfarctionScore;
+        this.sarcopeniaScore = sarcopeniaScore;
+        this.hyperlipidemiaScore = hyperlipidemiaScore;
+        this.boneDiseaseScore = boneDiseaseScore;
         super.changeStatus(ReportStatus.COMPLETE); // 상태를 COMPLETE로 변경
     }
 

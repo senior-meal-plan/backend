@@ -41,7 +41,6 @@ public class DailyReportService {
     }
 
     public DailyReport getDailyReport(Long dailyReportId) {
-
         return dailyReportRepository.findById(dailyReportId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 ID의 데일리 리포트를 찾을 수 없습니다: " + dailyReportId));
     }
@@ -70,9 +69,13 @@ public class DailyReportService {
                     result.totalCalcium(),
                     result.summary(),
                     severityEnum,
-                    result.proScore(),
-                    result.calScore(),
-                    result.fatScore()
+                    result.summarizeScore(),
+                    result.macularDegenerationScore(),
+                    result.hyperlipidemiaScore(),
+                    result.myocardialInfarctionScore(),
+                    result.sarcopeniaScore(),
+                    result.boneDiseaseScore(),
+                    result.hypertensionScore()
             );
             log.info("데일리 리포트(ID: {})가 분석 결과로 업데이트되었습니다. 상태: COMPLETE", report.getReportId());
 
@@ -85,4 +88,6 @@ public class DailyReportService {
             report.markAsFailed();
         }
     }
+
+
 }

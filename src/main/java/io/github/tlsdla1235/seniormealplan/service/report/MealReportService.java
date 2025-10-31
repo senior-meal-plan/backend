@@ -42,7 +42,6 @@ public class MealReportService {
         return savedReport;
     }
 
-    @Transactional
     public void updateMealReportWithAnalysis(AnalysisMealResultDto dto) {
         // AI 서버가 mealId를 반환해준다고 가정
         Long mealId = dto.mealId();
@@ -88,6 +87,10 @@ public class MealReportService {
             log.error("Failed to update MealReport(ID: {}) with analysis.", mealReport.getReportId(), e);
             mealReport.changeStatus(ReportStatus.FAILED);
         }
+    }
+
+    public void getMealReportByMealId(Meal meal) {
+
     }
 
 }
