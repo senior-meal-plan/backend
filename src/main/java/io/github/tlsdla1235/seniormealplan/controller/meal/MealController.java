@@ -11,31 +11,31 @@ import io.github.tlsdla1235.seniormealplan.service.food.MealService;
 import io.github.tlsdla1235.seniormealplan.service.orchestration.UploadMealService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping("/v1/user")
 public class MealController {
     private final UploadMealService uploadMealService;
     private final MealService mealService;
 
-    @PostMapping("/v1/user/me/uploads")
+    @PostMapping("/me/uploads")
     public ResponseEntity<PresignedUrlResponse> generatePresignedUrl(@RequestBody PresignedUrlRequest request)
     {
         PresignedUrlResponse response = uploadMealService.generatePresignedUrl(request.fileName());
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("/v1/user/me/meal-reports")
+    @PostMapping("/me/meal-reports")
     public ResponseEntity<String> generateMealReport(@RequestBody MealCreateRequest newMeal, @AuthenticationPrincipal JwtAuthFilter.JwtPrincipal me)
     {
         Meal meal = Meal.builder()
@@ -50,12 +50,35 @@ public class MealController {
         return ResponseEntity.ok().body("Meal report generated");
     }
 
-    @GetMapping("/v1/user/me/meals/today")
+    @GetMapping("/me/meals/today")
     public ResponseEntity<MealResponseDto> getTodayMeals(@AuthenticationPrincipal JwtAuthFilter.JwtPrincipal me)
     {
         User user = User.builder().userId(me.userId()).build();
         List<MealResponseDto> response= mealService.getTodayMeals(user);
 
-        return !response.isEmpty() ? ResponseEntity.ok().body(response.get(0)) : ResponseEntity.notFound().build();
+        return !response.isEmpty() ? ResponseEntity.ok().body(response.get(0)) : ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/me/meals")
+    public ResponseEntity<List<MealResponseDto>> getMealsByDate(
+            @AuthenticationPrincipal JwtAuthFilter.JwtPrincipal me,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)
+    {
+        User user = User.builder().userId(me.userId()).build();
+        List<MealResponseDto> response = mealService.getMealsByDate(user, date);
+
+        return !response.isEmpty()
+                ? ResponseEntity.ok().body(response) // 리스트 전체 반환
+                : ResponseEntity.noContent().build(); // 데이터가 없을 땐 204 No Content
+    }
+
+    @GetMapping("/me/meals/dates")
+    public ResponseEntity<List<LocalDate>> getAllMealDates(@AuthenticationPrincipal JwtAuthFilter.JwtPrincipal me)
+    {
+        User user = User.builder().userId(me.userId()).build();
+        List<LocalDate> dates = mealService.getAllMealDateFromUser(user);
+        return !dates.isEmpty() ? ResponseEntity.ok().body(dates) : ResponseEntity.notFound().build();
+    }
+
+
 }

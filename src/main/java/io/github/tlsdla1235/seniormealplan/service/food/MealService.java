@@ -29,6 +29,13 @@ public class MealService {
         return mealResponseDtos;
     }
 
+    public List<MealResponseDto> getMealsByDate(User user, LocalDate date) {
+        List<Meal> meals = findByUserAndMealDateWithFoods(user, date);
+        List<MealResponseDto> mealResponseDtos = meals.stream().map(MealResponseDto::from).toList();
+        log.info("사용자 id:{}에 대한 getTodayMeals 결과값: {}", user.getUserId(), mealResponseDtos);
+        return mealResponseDtos;
+    }
+
     public List<Meal> findByUserAndMealDateWithFoods(User user, LocalDate date) {
         return mealRepository.findByUserAndMealDateWithFoods(user, date);
     }
@@ -53,5 +60,11 @@ public class MealService {
         meal.setUnrefinedCarbsIntake(analysisMealResultDto.isUnrefinedCarbsIntake());
 
         log.info("Meal(ID: {}) updated with analysis.", meal.getMealId());
+    }
+
+    public List<LocalDate> getAllMealDateFromUser(User user) {
+        List<LocalDate> mealDates = mealRepository.findDistinctMealDatesByUser(user);
+        log.info("userid:{}에 대한 getAllMealDateFromUser 반환 결과 : {}", user.getUserId(), mealDates);
+        return mealDates;
     }
 }
