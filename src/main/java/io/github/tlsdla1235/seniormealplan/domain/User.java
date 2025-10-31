@@ -78,5 +78,14 @@ public class User {
         this.createdAt = LocalDateTime.now();
         if (this.role == null) this.role = Role.USER;
     }
+
+    public void updateProfile(String userName, Integer userAge, BigDecimal userHeight,
+                              BigDecimal userWeight, UserGenderType userGender) {
+        this.userName = userName;
+        this.age = userAge;
+        this.userHeight = userHeight;
+        this.userWeight = userWeight;
+        this.userGender = userGender;
+    }
 }
 

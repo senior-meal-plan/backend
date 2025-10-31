@@ -34,6 +34,7 @@ public class AuthService {
     private final UserSelectedTopicRepository userSelectedRepo;
     private final HealthTopicRepository healthRepo;
     private final HealthMetricService healthMetricService;
+
     public void register(RegisterRequest req) {
         if (repo.existsByUserInputId(req.userInputId())) {
             throw new IllegalArgumentException("이미 가입된 사용자 ID");
