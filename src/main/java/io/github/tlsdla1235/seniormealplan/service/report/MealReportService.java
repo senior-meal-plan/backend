@@ -5,6 +5,7 @@ import io.github.tlsdla1235.seniormealplan.domain.enumPackage.ReportStatus;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Severity;
 import io.github.tlsdla1235.seniormealplan.domain.report.MealReport;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
+import io.github.tlsdla1235.seniormealplan.dto.mealreport.MealReportResponseDto;
 import io.github.tlsdla1235.seniormealplan.repository.MealReportRepository;
 import io.github.tlsdla1235.seniormealplan.repository.ReportRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -89,8 +90,11 @@ public class MealReportService {
         }
     }
 
-    public void getMealReportByMealId(Meal meal) {
-
+    public MealReportResponseDto getMealReportByMealId(Meal meal) {
+        MealReport mealReport = mealReportRepository.findByMeal_MealId(meal.getMealId()).orElseThrow(() -> new EntityNotFoundException("MealReport not found for Meal ID: " + meal.getMealId()));
+        MealReportResponseDto responseDto = MealReportResponseDto.fromMealReport(mealReport);
+        log.info("getMealReportByMealId에서 mealId :{}에 대한 호출, {}", meal.getMealId(), responseDto);
+        return responseDto;
     }
 
 }

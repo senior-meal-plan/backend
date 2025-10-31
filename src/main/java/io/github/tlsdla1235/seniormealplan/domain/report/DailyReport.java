@@ -40,9 +40,11 @@ public class DailyReport extends Report {
     @Column(name = "severity")
     private Severity severity;
 
-    // 점수 필드들
     @Column(name = "summarize_score")
     private BigDecimal summarizeScore;
+
+    @Column(name = "basic_score")
+    private BigDecimal basicScore;
 
     @Column(name = "macular_degeneration_score")
     private BigDecimal macularDegenerationScore; // 황반변성 점수
@@ -72,13 +74,14 @@ public class DailyReport extends Report {
     public void updateWithAnalysis(BigDecimal totalKcal, BigDecimal totalProtein,
                                    BigDecimal totalCarbs, BigDecimal totalFat,
                                    BigDecimal totalCalcium, String summary,
-                                   Severity severity, BigDecimal summarizeScore,
+                                   Severity severity, BigDecimal summarizeScore, BigDecimal basicScore,
                                    BigDecimal macularDegenerationScore,
                                    BigDecimal hyperlipidemiaScore,
                                    BigDecimal myocardialInfarctionScore,
                                    BigDecimal sarcopeniaScore,
                                    BigDecimal boneDiseaseScore,
-                                   BigDecimal hypertensionScore) {
+                                   BigDecimal hypertensionScore
+                                   ) {
         this.totalKcal = totalKcal;
         this.totalProtein = totalProtein;
         this.totalCarbs = totalCarbs;
@@ -93,6 +96,7 @@ public class DailyReport extends Report {
         this.sarcopeniaScore = sarcopeniaScore;
         this.hyperlipidemiaScore = hyperlipidemiaScore;
         this.boneDiseaseScore = boneDiseaseScore;
+        this.basicScore = basicScore;
         super.changeStatus(ReportStatus.COMPLETE); // 상태를 COMPLETE로 변경
     }
 

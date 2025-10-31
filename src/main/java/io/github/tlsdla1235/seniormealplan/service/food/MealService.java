@@ -54,5 +54,4 @@ public class MealService {
 
         log.info("Meal(ID: {}) updated with analysis.", meal.getMealId());
     }
-    
 }

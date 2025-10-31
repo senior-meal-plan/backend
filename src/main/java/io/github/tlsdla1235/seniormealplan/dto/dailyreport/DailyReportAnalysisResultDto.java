@@ -17,6 +17,7 @@ public record DailyReportAnalysisResultDto(
         String severity,       // Enum으로 바로 받기보다 String으로 받아 안전하게 변환
 
         BigDecimal summarizeScore,
+        BigDecimal basicScore,
         BigDecimal macularDegenerationScore,
         BigDecimal hypertensionScore,
         BigDecimal myocardialInfarctionScore,

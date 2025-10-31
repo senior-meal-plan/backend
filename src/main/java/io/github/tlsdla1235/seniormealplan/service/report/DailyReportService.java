@@ -2,9 +2,11 @@ package io.github.tlsdla1235.seniormealplan.service.report;
 
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
 import io.github.tlsdla1235.seniormealplan.domain.User;
+import io.github.tlsdla1235.seniormealplan.domain.enumPackage.ReportStatus;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Severity;
 import io.github.tlsdla1235.seniormealplan.domain.report.DailyReport;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisResultDto;
+import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportResponseDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealRequestDto;
 import io.github.tlsdla1235.seniormealplan.repository.DailyReportRepository;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -70,6 +73,7 @@ public class DailyReportService {
                     result.summary(),
                     severityEnum,
                     result.summarizeScore(),
+                    result.basicScore(),
                     result.macularDegenerationScore(),
                     result.hyperlipidemiaScore(),
                     result.myocardialInfarctionScore(),
@@ -90,4 +94,14 @@ public class DailyReportService {
     }
 
 
+    public DailyReportResponseDto getDailyReportByDate(User user ,LocalDate date) {
+        DailyReport dailyReport = dailyReportRepository.findByUserAndReportDate(user, date).orElseThrow(EntityNotFoundException::new);
+        if (dailyReport.getStatus() != ReportStatus.COMPLETE) {
+            throw new IllegalStateException("아직 처리 중이거나 실패한 리포트입니다. status: " + dailyReport.getStatus());
+        }
+        log.info("user id: {}에 대한 {}의 daily report 조회가 완료되었습니다.", user.getUserId(), date);
+        DailyReportResponseDto responseDto = DailyReportResponseDto.fromDailyReport(dailyReport);
+        log.info("{}", responseDto);
+        return responseDto;
+    }
 }
