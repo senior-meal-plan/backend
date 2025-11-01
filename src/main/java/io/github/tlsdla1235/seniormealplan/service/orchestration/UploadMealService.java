@@ -2,16 +2,19 @@ package io.github.tlsdla1235.seniormealplan.service.orchestration;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
+import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.domain.report.MealReport;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealCreateRequest;
 import io.github.tlsdla1235.seniormealplan.dto.s3dto.PresignedUrlResponse;
+import io.github.tlsdla1235.seniormealplan.dto.user.WhoAmIDto;
 import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
 import io.github.tlsdla1235.seniormealplan.service.food.FoodService;
 import io.github.tlsdla1235.seniormealplan.service.food.MealService;
 import io.github.tlsdla1235.seniormealplan.service.report.MealReportService;
+import io.github.tlsdla1235.seniormealplan.service.user.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,8 @@ public class UploadMealService {
     private final WebClient webClient;
     private final FoodService foodService;
     private final MealService mealService;
+    private final UserService userService;
+
     @Value("${service.meal.analysis.url}")
     private String analysisApiUrl; // FastAPI 서버 주소 (application.yml)
 
@@ -50,16 +55,20 @@ public class UploadMealService {
         log.info("사용자 id {}에 대한 meal이 생성되었습니다. mealid ={}", meal.getUser().getUserId(), meal.getMealId());
         MealReport mealReport = mealReportService.createPendingMealReport(meal);
         log.info("사용자 id {}에 대한 mealReport가 생성되었습니다. reportid ={}", meal.getUser().getUserId(), mealReport.getReportId());
+        User user = User.builder().userId(meal.getUser().getUserId()).build();
 //        requestMealAnalysis(meal);
         return meal;
     }
 
     @Async
-    public void requestMealAnalysis(Meal meal) {
+    public void requestMealAnalysis(Meal meal, User user) {
+        WhoAmIDto whoAmIDto = userService.whoAmI(user);
+        log.info("requestMealAnalysis 에서 whoAmI dto 생성 :{}", whoAmIDto);
         AnalysisMealRequestDto requestDto = new AnalysisMealRequestDto(
                 meal.getMealId(),
                 meal.getPhotoUrl(),
-                webhookCallbackUrl
+                webhookCallbackUrl,
+                whoAmIDto
         );
 
         // WebClient를 사용해 FastAPI 서버에 분석 요청

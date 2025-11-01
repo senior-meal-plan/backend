@@ -1,7 +1,9 @@
 package io.github.tlsdla1235.seniormealplan.controller.aiServerCon;
 
 
+import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
+import io.github.tlsdla1235.seniormealplan.dto.meal.MealDto;
 import io.github.tlsdla1235.seniormealplan.service.orchestration.UploadMealService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +25,10 @@ public class MealWebhookController {
 
         // 웹훅은 수신 확인 의미로 200 OK만 응답하는 것이 일반적
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/dtoCheckApi")
+    public ResponseEntity<String> checkApi(@RequestBody AnalysisMealRequestDto dto) {
+        return ResponseEntity.ok("good");
     }
 }

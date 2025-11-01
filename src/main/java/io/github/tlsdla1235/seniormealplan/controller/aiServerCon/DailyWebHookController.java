@@ -1,5 +1,6 @@
 package io.github.tlsdla1235.seniormealplan.controller.aiServerCon;
 
+import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisResultDto;
 import io.github.tlsdla1235.seniormealplan.service.orchestration.GenerateDailyReportService;
 import lombok.RequiredArgsConstructor;
@@ -23,4 +24,10 @@ public class DailyWebHookController {
         generateDailyReportService.updateDailyReportWithAnalysis(resultDto);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/dtoCheckApi")
+    public ResponseEntity<String> check(@RequestBody DailyReportAnalysisRequestDto dto){
+        return ResponseEntity.ok().body("good");
+    }
+
 }

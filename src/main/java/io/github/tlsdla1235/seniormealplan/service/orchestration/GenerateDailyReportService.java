@@ -9,10 +9,12 @@ import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisRe
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalyzedFoodDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealDto;
+import io.github.tlsdla1235.seniormealplan.dto.user.WhoAmIDto;
 import io.github.tlsdla1235.seniormealplan.repository.DailyReportRepository;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
 import io.github.tlsdla1235.seniormealplan.service.food.MealService;
 import io.github.tlsdla1235.seniormealplan.service.report.DailyReportService;
+import io.github.tlsdla1235.seniormealplan.service.user.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,7 @@ public class GenerateDailyReportService {
     private final DailyReportService dailyReportService;
     private final MealService mealService;
     private final DailyReportRepository dailyReportRepository;
+    private final UserService userService;
 
     @Value("${service.daily.analysis.url}")
     private String analysisApiUrl; // FastAPI 서버 주소 (application.yml)
@@ -61,8 +64,8 @@ public class GenerateDailyReportService {
     @Async
     public void requestAnalysisToExternalApi(User user, List<Meal> meals, DailyReport report) {
         log.info("Starting async request for daily report analysis. Report ID: {}", report.getReportId());
+        WhoAmIDto whoAmIDto = userService.whoAmI(user);
 
-        // 엔티티 리스트를 DTO 리스트로 변환
         List<MealDto> mealDtos = meals.stream()
                 .map(meal -> new MealDto(
                         meal.getMealType(),
@@ -95,7 +98,7 @@ public class GenerateDailyReportService {
         log.info("mealDto 디버깅: {}", mealDtos);
         DailyReportAnalysisRequestDto requestDto = new DailyReportAnalysisRequestDto(
                 report.getReportId(),
-                user.getUserId(),
+                whoAmIDto,
                 mealDtos,
                 webhookCallbackUrl
         );

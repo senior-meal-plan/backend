@@ -8,15 +8,18 @@ import io.github.tlsdla1235.seniormealplan.service.user.AuthService;
 import io.github.tlsdla1235.seniormealplan.service.user.UserTopicService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Slf4j
 public class securityTestController {
     private final AuthService auth;
     private final UserTopicService userSelectedTopicService;
@@ -35,6 +38,8 @@ public class securityTestController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest req){
+        LocalDate date = LocalDate.now();
+        log.info("date: {}", date);
         return ResponseEntity.ok(auth.login(req));
     }
 

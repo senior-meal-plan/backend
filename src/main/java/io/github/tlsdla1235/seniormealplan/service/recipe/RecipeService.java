@@ -14,9 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecipeService {
     private final RecipeRepository recipeRepository;
 
-
-
-
     @Transactional
     public void save(RecipeDto dto) {
         Recipe newRecipe = Recipe.builder().name(dto.name()).description(dto.description()).build();

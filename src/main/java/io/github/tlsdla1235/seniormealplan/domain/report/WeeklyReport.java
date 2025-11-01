@@ -2,7 +2,9 @@ package io.github.tlsdla1235.seniormealplan.domain.report;
 
 
 import io.github.tlsdla1235.seniormealplan.domain.User;
+import io.github.tlsdla1235.seniormealplan.domain.enumPackage.ReportStatus;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Severity;
+import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.GetWeeklyReportDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -41,9 +43,16 @@ public class WeeklyReport extends Report {
     public WeeklyReport(User user, LocalDate weekStart, LocalDate weekEnd) {
         super.setUser(user);
         super.setReportDate(weekEnd);
-
-
         this.weekStart = weekStart;
         this.weekEnd = weekEnd;
     }
+
+    public void UpdateWithAnalysis(String summaryGoodPoint, String summaryBadPoint, String summaryAiRecommend, Severity severity) {
+        this.summaryGoodPoint = summaryGoodPoint;
+        this.summaryBadPoint = summaryBadPoint;
+        this.summaryAiRecommand = summaryAiRecommend;
+        this.severity = severity;
+        super.changeStatus(ReportStatus.COMPLETE);
+    }
+
 }

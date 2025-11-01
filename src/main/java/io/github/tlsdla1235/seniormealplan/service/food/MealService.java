@@ -3,6 +3,7 @@ package io.github.tlsdla1235.seniormealplan.service.food;
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
+import io.github.tlsdla1235.seniormealplan.dto.meal.MealImageDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealResponseDto;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.MealForWeeklyDto;
 import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,5 +90,11 @@ public class MealService {
 
         log.info("사용자 id:{}에 대한 지난주 식사(getMealsForLastWeek) 결과값: {}", user.getUserId(), mealDtos);
         return mealDtos;
+    }
+
+    public List<MealImageDto> findByUserAndMealDateIn(User user, Collection<LocalDate> dates)
+    {
+        List<Meal> meals = mealRepository.findByUserAndMealDateIn(user, dates);
+        return meals.stream().map(MealImageDto::fromMeal).toList();
     }
 }

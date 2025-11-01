@@ -29,4 +29,9 @@ public class UserWeeklyRecommendation {
     @Column(name = "generated_at")
     private LocalDate generatedAt;
 
+    public UserWeeklyRecommendation(User user, Recipe recipe, LocalDate generatedAt) {
+        this.user = user;
+        this.recipe = recipe;
+        this.generatedAt = generatedAt;
+    }
 }

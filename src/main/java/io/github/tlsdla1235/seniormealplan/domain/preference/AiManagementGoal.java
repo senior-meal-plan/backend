@@ -2,9 +2,8 @@ package io.github.tlsdla1235.seniormealplan.domain.preference;
 
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 /**
@@ -13,6 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "ai_management_goals")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class AiManagementGoal {
 

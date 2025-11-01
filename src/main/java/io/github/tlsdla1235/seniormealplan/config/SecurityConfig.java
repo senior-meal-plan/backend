@@ -127,7 +127,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/", "/index.html", "/assets/**", "/css/**", "/js/**", "/actuator/health").permitAll()
-                        .requestMatchers("/api/admin/**", "/api/uploads/**").permitAll()
+                        .requestMatchers("/api/admin/**", "/api/uploads/**","/api/v1/webhooks/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(daoAuthProvider())

@@ -6,6 +6,7 @@ import io.github.tlsdla1235.seniormealplan.domain.enumPackage.ReportStatus;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Severity;
 import io.github.tlsdla1235.seniormealplan.domain.report.DailyReport;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisResultDto;
+import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportForWeeklyDto;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportResponseDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.DailyReportsForWeeklyReportDto;
@@ -53,10 +54,7 @@ public class DailyReportService {
     }
 
     public void updateReportWithAnalysis(DailyReportAnalysisResultDto result) {
-        // 1. DTO의 reportId로 DB에서 기존 DailyReport 엔티티를 찾습니다.
         DailyReport report = this.getDailyReport(result.reportId());
-
-        // 2. 분석 결과가 실패인 경우, 상태를 FAILED로 변경하고 로직을 종료합니다.
         if (!"SUCCESS".equals(result.status())) {
             log.error("데일리 리포트(ID: {}) 분석 실패. 원인: {}", result.reportId(), result.errorMessage());
             report.markAsFailed();
@@ -64,10 +62,10 @@ public class DailyReportService {
         }
 
         try {
-            // 3. String으로 받은 severity 값을 Enum으로 변환합니다.
+            // String으로 받은 severity 값을 Enum으로 변환합니다.
             Severity severityEnum = Severity.valueOf(result.severity().toUpperCase());
 
-            // 4. 엔티티 내부의 업데이트 메서드를 호출하여 모든 필드를 갱신하고 상태를 COMPLETE로 변경합니다.
+            // 엔티티 내부의 업데이트 메서드를 호출하여 모든 필드를 갱신하고 상태를 COMPLETE로 변경합니다.
             report.updateWithAnalysis(
                     result.totalKcal(),
                     result.totalProtein(),
@@ -96,7 +94,6 @@ public class DailyReportService {
             report.markAsFailed();
         }
     }
-
 
     public DailyReportResponseDto getDailyReportByDate(User user ,LocalDate date) {
         DailyReport dailyReport = dailyReportRepository.findByUserAndReportDate(user, date).orElseThrow(EntityNotFoundException::new);
@@ -127,4 +124,12 @@ public class DailyReportService {
                 .filter(Objects::nonNull)                  // null이 아닌 것만 필터링
                 .collect(Collectors.toList());             // 리스트로 수집
     }
+
+    public List<DailyReportForWeeklyDto> getDailyReportBetweenDate(User user, LocalDate startDate, LocalDate endDate) {
+        List<DailyReport> list =dailyReportRepository.findByUserAndReportDateBetween(user, startDate, endDate);
+        return list.stream().map(DailyReportForWeeklyDto::from).collect(Collectors.toList());
+    }
+
+
+
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 public interface MealRepository extends JpaRepository<Meal, Long> {
@@ -19,4 +20,6 @@ public interface MealRepository extends JpaRepository<Meal, Long> {
 
     @Query("SELECT m FROM Meal m JOIN FETCH m.foods f WHERE m.user = :user AND m.mealDate BETWEEN :startDate AND :endDate ORDER BY m.mealDate, m.mealType")
     List<Meal> findByUserAndMealDateBetweenWithFoods(@Param("user") User user, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    List<Meal> findByUserAndMealDateIn(User user, Collection<LocalDate> dates);
 }
