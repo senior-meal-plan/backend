@@ -1,7 +1,6 @@
 package io.github.tlsdla1235.seniormealplan.controller.admin;
 
-import io.github.tlsdla1235.seniormealplan.domain.recipe.Recipe;
-import io.github.tlsdla1235.seniormealplan.dto.recipe.RecipeDto;
+import io.github.tlsdla1235.seniormealplan.dto.recipe.RecipeGenerateDto;
 import io.github.tlsdla1235.seniormealplan.dto.tempdto.HealthTopicCreateRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.WeeklyReportGenerateRequestDto;
 import io.github.tlsdla1235.seniormealplan.service.admin.AdminService;
@@ -30,7 +29,7 @@ public class HealthTopicController {
     }
 
     @PostMapping("/recipe")
-    public ResponseEntity<Void> createRecipe(@RequestBody RecipeDto recipe) {
+    public ResponseEntity<Void> createRecipe(@RequestBody RecipeGenerateDto recipe) {
         recipeService.save(recipe);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

@@ -29,6 +29,13 @@ public class RecipeRecommendService {
                     return new UserWeeklyRecommendation(user, recipeReference, generatedDate);
                 })
                 .collect(Collectors.toList());
+
+        log.info("사용자 id :{}에 대해 recipe Id:{}들이 추천되었습니다.", user.getUserId(), analysisResult.aiRecommendRecipe());
         return userWeeklyRecommendationRepository.saveAll(recommendations);
+    }
+
+
+    public List<Recipe> findWeeklyRecommendationsByUser(User user) {
+        return userWeeklyRecommendationRepository.findMostRecentByUser(user).stream().map(UserWeeklyRecommendation::getRecipe).collect(Collectors.toList());
     }
 }
