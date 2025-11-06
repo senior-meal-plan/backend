@@ -57,7 +57,6 @@ public class GenerateDailyReportService {
         DailyReport report = dailyReportService.createPendingDailyReport(user, date);
         user.setLastDailyReportDate(date);
         log.info("Updated last daily report date for user ID: {} to {}", user.getUserId(), date);
-        // 4. 외부 API에 분석을 요청하는 비동기 메서드를 호출합니다.
         this.requestAnalysisToExternalApi(user, meals, report);
     }
 

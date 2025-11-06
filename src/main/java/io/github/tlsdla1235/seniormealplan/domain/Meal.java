@@ -70,6 +70,9 @@ public class Meal {
     @Column(name = "photo_url")
     private String photoUrl;
 
+    @Column(name = "unique_file_name")
+    private String uniqueFileName;
+
     @Column(name = "is_dairy_intake", nullable = false)
     @Builder.Default
     private boolean isDairyIntake = false;

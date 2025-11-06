@@ -13,14 +13,14 @@ public record MealResponseDto(
         MealType mealType, // 아침(BREAKFAST), 점심(LUNCH), 저녁(DINNER) 구분
         List<String> foodNames // 해당 끼니에 포함된 음식 이름 목록
 ) {
-    public static MealResponseDto from(Meal meal) {
+    public static MealResponseDto from(Meal meal, String presignedPhotoUrl) {
         List<String> foodNames = meal.getFoods().stream()
                 .map(Food::getName)
                 .toList();
 
         return new MealResponseDto(
                 meal.getMealId(),
-                meal.getPhotoUrl(),
+                presignedPhotoUrl, // Meal의 photoUrl 대신 파라미터로 받은 URL 사용
                 meal.getMealType(),
                 foodNames
         );

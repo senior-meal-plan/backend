@@ -51,12 +51,13 @@ public class UploadMealService {
     public Meal saveMeal(Meal meal, String uniqueFileName){
         String url = s3UploadService.getFileUrl(uniqueFileName);
         meal.setPhotoUrl(url);
+        meal.setUniqueFileName(uniqueFileName);
         mealRepository.save(meal);
         log.info("사용자 id {}에 대한 meal이 생성되었습니다. mealid ={}", meal.getUser().getUserId(), meal.getMealId());
         MealReport mealReport = mealReportService.createPendingMealReport(meal);
         log.info("사용자 id {}에 대한 mealReport가 생성되었습니다. reportid ={}", meal.getUser().getUserId(), mealReport.getReportId());
         User user = User.builder().userId(meal.getUser().getUserId()).build();
-//        requestMealAnalysis(meal);
+//        requestMealAnalysis(meal, user);
         return meal;
     }
 

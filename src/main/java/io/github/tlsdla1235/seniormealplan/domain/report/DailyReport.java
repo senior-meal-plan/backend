@@ -46,23 +46,23 @@ public class DailyReport extends Report {
     @Column(name = "basic_score")
     private BigDecimal basicScore;
 
-    @Column(name = "macular_degeneration_score")
-    private BigDecimal macularDegenerationScore; // 황반변성 점수
+        @Column(name = "macular_degeneration_score")
+        private BigDecimal macularDegenerationScore; // 황반변성 점수
 
-    @Column(name = "hypertension_score")
-    private BigDecimal hypertensionScore; // 고혈압 점수
+        @Column(name = "hypertension_score")
+        private BigDecimal hypertensionScore; // 고혈압 점수
 
-    @Column(name = "myocardial_infarction_score")
-    private BigDecimal myocardialInfarctionScore; // 심근경색 점수
+        @Column(name = "myocardial_infarction_score")
+        private BigDecimal myocardialInfarctionScore; // 심근경색 점수
 
-    @Column(name = "sarcopenia_score")
-    private BigDecimal sarcopeniaScore; // 근감소증 점수
+        @Column(name = "sarcopenia_score")
+        private BigDecimal sarcopeniaScore; // 근감소증 점수
 
-    @Column(name = "hyperlipidemia_score")
-    private BigDecimal hyperlipidemiaScore; // 고지혈증 점수
+        @Column(name = "hyperlipidemia_score")
+        private BigDecimal hyperlipidemiaScore; // 고지혈증 점수
 
-    @Column(name = "bone_disease_score")
-    private BigDecimal boneDiseaseScore; // 뼈질환 점수
+        @Column(name = "bone_disease_score")
+        private BigDecimal boneDiseaseScore; // 뼈질환 점수
 
 
     public DailyReport(User user, LocalDate reportDate) {

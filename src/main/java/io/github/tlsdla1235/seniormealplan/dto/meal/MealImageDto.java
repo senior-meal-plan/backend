@@ -9,10 +9,10 @@ public record MealImageDto(
         String photoUrl,
         LocalDate date
 ) {
-    public static MealImageDto fromMeal(Meal meal) {
+    public static MealImageDto fromMeal(Meal meal, String presingedUrl) {
         return new MealImageDto(
                 meal.getMealId(),
-                meal.getPhotoUrl(),
+                presingedUrl,
                 meal.getMealDate()
         );
     }

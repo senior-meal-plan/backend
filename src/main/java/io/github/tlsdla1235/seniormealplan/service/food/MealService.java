@@ -7,6 +7,7 @@ import io.github.tlsdla1235.seniormealplan.dto.meal.MealImageDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealResponseDto;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.MealForWeeklyDto;
 import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
+import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,19 +25,25 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MealService {
     private final MealRepository mealRepository;
-
+    private final S3UploadService s3UploadService;
 
     public List<MealResponseDto> getTodayMeals(User user) {
         LocalDate today = LocalDate.now();
         List<Meal> meals = findByUserAndMealDateWithFoods(user, today);
-        List<MealResponseDto> mealResponseDtos = meals.stream().map(MealResponseDto::from).toList();
+        List<MealResponseDto> mealResponseDtos = meals.stream().map(meal->{
+            String presignedUrl = s3UploadService.generatePresignedUrlForGet(meal.getUniqueFileName());
+            return MealResponseDto.from(meal, presignedUrl);
+        }).toList();
         log.info("사용자 id:{}에 대한 getTodayMeals 결과값: {}", user.getUserId(), mealResponseDtos);
         return mealResponseDtos;
     }
 
     public List<MealResponseDto> getMealsByDate(User user, LocalDate date) {
         List<Meal> meals = findByUserAndMealDateWithFoods(user, date);
-        List<MealResponseDto> mealResponseDtos = meals.stream().map(MealResponseDto::from).toList();
+        List<MealResponseDto> mealResponseDtos = meals.stream().map(meal->{
+            String presignedUrl = s3UploadService.generatePresignedUrlForGet(meal.getUniqueFileName());
+            return MealResponseDto.from(meal, presignedUrl);
+        }).toList();
         log.info("사용자 id:{}에 대한 getTodayMeals 결과값: {}", user.getUserId(), mealResponseDtos);
         return mealResponseDtos;
     }
@@ -95,6 +102,10 @@ public class MealService {
     public List<MealImageDto> findByUserAndMealDateIn(User user, Collection<LocalDate> dates)
     {
         List<Meal> meals = mealRepository.findByUserAndMealDateIn(user, dates);
-        return meals.stream().map(MealImageDto::fromMeal).toList();
+        return meals.stream().map(meal->{
+            String presignedUrl = s3UploadService.generatePresignedUrlForGet(meal.getUniqueFileName());
+            return MealImageDto.fromMeal(meal, presignedUrl);
+        }).toList();
+
     }
 }

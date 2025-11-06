@@ -55,6 +55,25 @@ public class S3UploadService {
         }
     }
 
+    public String generatePresignedUrlForGet(String objectKey) {
+        if (objectKey == null || objectKey.isEmpty()) {
+            return null;
+        }
+
+        Date expiration = new Date();
+        long expTimeMillis = expiration.getTime();
+        expTimeMillis += 1000 * 60 * 5; // 5분
+        expiration.setTime(expTimeMillis);
+
+        GeneratePresignedUrlRequest presignedUrlRequest =
+                new GeneratePresignedUrlRequest(bucket, objectKey)
+                        .withMethod(HttpMethod.GET)
+                        .withExpiration(expiration);
+
+        URL url = amazonS3Client.generatePresignedUrl(presignedUrlRequest);
+        return url.toString();
+    }
+
     /**
      * 클라이언트가 S3에 직접 파일을 업로드할 수 있는 Pre-signed URL을 생성합니다.
      * @param originalFileName 클라이언트가 업로드하려는 원본 파일 이름

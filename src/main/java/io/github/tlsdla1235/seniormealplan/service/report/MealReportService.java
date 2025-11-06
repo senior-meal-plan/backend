@@ -31,11 +31,10 @@ public class MealReportService {
             throw new IllegalArgumentException("Meal must have a User to create a report.");
         }
 
-        MealReport mealReport = new MealReport(meal); // MealReport에 생성자 추가 필요
+        MealReport mealReport = new MealReport(meal);
 
-        // Report의 공통 필드 설정 (MealReport 생성자에서 처리하는 것이 더 좋습니다)
         mealReport.setUser(meal.getUser());
-        mealReport.setReportDate(meal.getMealDate()); // Meal에 getMealDate()가 있다고 가정
+        mealReport.setReportDate(meal.getMealDate());
 
         // save()가 호출될 때 Report 엔티티의 @PrePersist가 status를 PENDING으로 설정합니다.
         MealReport savedReport = mealReportRepository.save(mealReport);
