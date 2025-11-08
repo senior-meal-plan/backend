@@ -63,4 +63,6 @@ public class DailyReportController {
                 "데일리 리포트 생성 요청이 접수되었습니다. User ID: " + u.getUserId() + ", Date: " + date
         );
     }
+
+
 }

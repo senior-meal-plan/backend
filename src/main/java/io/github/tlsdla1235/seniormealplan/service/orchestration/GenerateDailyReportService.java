@@ -5,6 +5,7 @@ import io.github.tlsdla1235.seniormealplan.domain.Meal;
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Severity;
 import io.github.tlsdla1235.seniormealplan.domain.report.DailyReport;
+import io.github.tlsdla1235.seniormealplan.dto.async.DailyReportGenerationData;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalyzedFoodDto;
@@ -20,11 +21,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,20 +36,51 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenerateDailyReportService {
 
-    private final S3UploadService s3UploadService;
-    private final WebClient webClient;
     private final DailyReportService dailyReportService;
     private final MealService mealService;
-    private final DailyReportRepository dailyReportRepository;
-    private final UserService userService;
-
-    @Value("${service.daily.analysis.url}")
-    private String analysisApiUrl; // FastAPI 서버 주소 (application.yml)
-
-    @Value("${service.webhook.callback-url}")
-    private String webhookCallbackUrl; // 우리 웹훅 주소 (application.yml)
+    private final ReportAsyncService reportAsyncService;
 
 
+
+    @Scheduled(cron = "0 0 1 * * *", zone = "Asia/Seoul")
+    public void generateDailyReportsBatch() {
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        log.info("데일리 리포트 배치 작업 시작. 대상 날짜: {}", yesterday);
+
+        // 1. 어제 식사한 유저 조회
+        List<User> usersToReport = mealService.findUsersWithMealsOnDate(yesterday);
+
+        if (usersToReport.isEmpty()) {
+            log.info("배치 작업: {} 날짜에 식사 기록이 있는 유저가 없습니다.", yesterday);
+            return;
+        }
+        log.info("배치 작업: 총 {}명의 유저에 대한 리포트를 생성합니다.", usersToReport.size());
+
+        // 2. [변경] 트랜잭션 메서드를 호출하여 모든 리포트를 '먼저' 생성
+        List<DailyReportGenerationData> generatedData = dailyReportService.createPendingReportsInTransaction(usersToReport, yesterday);
+
+        if (generatedData.isEmpty()) {
+            log.info("배치 작업: 생성된 리포트가 없어 API 호출을 생략합니다.");
+            return;
+        }
+
+        // 3. [변경] 모든 DB 커밋이 완료된 후, 비동기 서비스에 '배치 리스트' 전달
+        reportAsyncService.requestBatchAnalysis(generatedData);
+    }
+
+
+
+    @Transactional
+    public void updateDailyReportWithAnalysis(DailyReportAnalysisResultDto result) {
+        dailyReportService.updateReportWithAnalysis(result);
+    }
+
+
+    /**
+     * 테스트용. 추후 삭제
+     * @param user
+     * @param date
+     */
     @Transactional
     public void generateReportAndRequestAnalysis(User user, LocalDate date) {
         List<Meal> meals = mealService.findByUserAndMealDateWithFoods(user, date);
@@ -57,67 +92,13 @@ public class GenerateDailyReportService {
         DailyReport report = dailyReportService.createPendingDailyReport(user, date);
         user.setLastDailyReportDate(date);
         log.info("Updated last daily report date for user ID: {} to {}", user.getUserId(), date);
-        this.requestAnalysisToExternalApi(user, meals, report);
     }
 
-    @Async
-    public void requestAnalysisToExternalApi(User user, List<Meal> meals, DailyReport report) {
-        log.info("Starting async request for daily report analysis. Report ID: {}", report.getReportId());
-        WhoAmIDto whoAmIDto = userService.whoAmI(user);
-
-        List<MealDto> mealDtos = meals.stream()
-                .map(meal -> new MealDto(
-                        meal.getMealType(),
-                        meal.getMealTime(),
-                        meal.getPhotoUrl(),
-                        meal.getFoods().stream()
-                                .map(food -> new AnalyzedFoodDto(
-                                        food.getName(),
-                                        food.getKcal(),
-                                        food.getProtein(),
-                                        food.getCarbs(),
-                                        food.getFat(),
-                                        food.getCalcium(),
-                                        food.getServingSize(),
-                                        food.getSaturatedFatPercentKcal(),
-                                        food.getUnsaturatedFat(),
-                                        food.getDietaryFiber(),
-                                        food.getSodium(),
-                                        food.getAddedSugarKcal(),
-                                        food.getProcessedMeatGram(),
-                                        food.getVitaminD_IU(),
-                                        food.isVegetable(),
-                                        food.isFruit(),
-                                        food.isFried()
-                                ))
-                                .toList()
-                ))
-                .toList();
-
-        log.info("mealDto 디버깅: {}", mealDtos);
-        DailyReportAnalysisRequestDto requestDto = new DailyReportAnalysisRequestDto(
-                report.getReportId(),
-                whoAmIDto,
-                mealDtos,
-                webhookCallbackUrl
-        );
-
-        // WebClient로 FastAPI 서버에 요청
-        webClient.post()
-                .uri(analysisApiUrl)
-                .bodyValue(requestDto)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .doOnError(error -> log.error("Failed to request daily report analysis for report ID: {}", report.getReportId(), error))
-                .subscribe(
-                        result -> log.info("Successfully requested analysis for report ID: {}", report.getReportId()),
-                        error -> {}
-                );
+    @Scheduled(cron = "0 41 23 * * *", zone = "Asia/Seoul")
+    public void scheduleTestFor1130PM() {
+        LocalDateTime time = LocalDateTime.now();
+        log.info("========== 스케줄 테스트 ==========");
+        log.info("현재 시간 오후 11시 30분, 디버깅 메시지 출력 성공!: {}", time);
+        log.info("===================================");
     }
-
-    @Transactional
-    public void updateDailyReportWithAnalysis(DailyReportAnalysisResultDto result) {
-        dailyReportService.updateReportWithAnalysis(result);
-    }
-
 }

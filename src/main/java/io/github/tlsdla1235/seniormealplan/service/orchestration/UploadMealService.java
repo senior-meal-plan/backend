@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.domain.report.MealReport;
+import io.github.tlsdla1235.seniormealplan.dto.async.MealSavedEvent;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealCreateRequest;
@@ -19,6 +20,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,7 @@ public class UploadMealService {
     private final FoodService foodService;
     private final MealService mealService;
     private final UserService userService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${service.meal.analysis.url}")
     private String analysisApiUrl; // FastAPI 서버 주소 (application.yml)
@@ -57,29 +60,10 @@ public class UploadMealService {
         MealReport mealReport = mealReportService.createPendingMealReport(meal);
         log.info("사용자 id {}에 대한 mealReport가 생성되었습니다. reportid ={}", meal.getUser().getUserId(), mealReport.getReportId());
         User user = User.builder().userId(meal.getUser().getUserId()).build();
-//        requestMealAnalysis(meal, user);
+
+        eventPublisher.publishEvent(new MealSavedEvent(meal, user));
+
         return meal;
-    }
-
-    @Async
-    public void requestMealAnalysis(Meal meal, User user) {
-        WhoAmIDto whoAmIDto = userService.whoAmI(user);
-        log.info("requestMealAnalysis 에서 whoAmI dto 생성 :{}", whoAmIDto);
-        AnalysisMealRequestDto requestDto = new AnalysisMealRequestDto(
-                meal.getMealId(),
-                meal.getPhotoUrl(),
-                webhookCallbackUrl,
-                whoAmIDto
-        );
-
-        // WebClient를 사용해 FastAPI 서버에 분석 요청
-        webClient.post()
-                .uri(analysisApiUrl)
-                .bodyValue(requestDto)
-                .retrieve()
-                .bodyToMono(Void.class) // 응답은 딱히 필요 없으므로 Void
-                .doOnError(error -> log.error("Failed to request meal analysis", error))
-                .subscribe();
     }
 
     @Transactional

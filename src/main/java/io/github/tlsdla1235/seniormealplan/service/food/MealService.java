@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -81,6 +82,22 @@ public class MealService {
     }
 
     public List<MealForWeeklyDto> getMealsForLastWeek(User user, LocalDate date) {
+        LocalDate lastMonday = date.minusWeeks(1).with(DayOfWeek.MONDAY);
+        LocalDate lastSunday = date.minusWeeks(1).with(DayOfWeek.SUNDAY);
+
+        // 2. Repository를 통해 해당 기간의 식사 기록을 조회
+        List<Meal> meals = mealRepository.findByUserAndMealDateBetweenWithFoods(user, lastMonday, lastSunday);
+
+        // 3. DTO 리스트로 변환하여 반환 (MealForWeeklyDto::fromMeal 사용)
+        List<MealForWeeklyDto> mealDtos = meals.stream()
+                .map(MealForWeeklyDto::fromMeal) // MealResponseDto::from -> MealForWeeklyDto::fromMeal
+                .collect(Collectors.toList());
+
+        log.info("사용자 id:{}에 대한 지난주 식사(getMealsForLastWeek) 결과값: {}", user.getUserId(), mealDtos);
+        return mealDtos;
+    }
+
+    public List<MealForWeeklyDto> getMealsForCurrentWeek(User user, LocalDate date) {
         // 1. 지난주의 월요일과 일요일 날짜 계산
         LocalDate lastMonday = date.with(DayOfWeek.MONDAY);
         LocalDate lastSunday = date.with(DayOfWeek.SUNDAY);
@@ -107,5 +124,22 @@ public class MealService {
             return MealImageDto.fromMeal(meal, presignedUrl);
         }).toList();
 
+    }
+
+    @Transactional(readOnly = true) // 데이터 조작이 없는 순수 조회이므로 readOnly=true 권장
+    public List<User> findUsersWithMealsOnDate(LocalDate date) {
+        log.info("{} 날짜에 식사 기록이 있는 유저 조회를 시작합니다.", date);
+        List<User> users = mealRepository.findDistinctUsersByMealDate(date);
+        log.info("{} 날짜에 총 {}명의 유저가 조회되었습니다.", date, users.size());
+        return users;
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<User> findUsersWithMealsBetweenDates(LocalDate startDate, LocalDate endDate) {
+        log.info("{}부터 {} 사이 식사 기록이 있는 유저 조회를 시작합니다.", startDate, endDate);
+        List<User> users = mealRepository.findDistinctUsersByMealDateBetween(startDate, endDate);
+        log.info("해당 기간 총 {}명의 유저가 조회되었습니다.", users.size());
+        return users;
     }
 }

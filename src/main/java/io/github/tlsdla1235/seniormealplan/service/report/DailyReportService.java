@@ -5,6 +5,7 @@ import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.ReportStatus;
 import io.github.tlsdla1235.seniormealplan.domain.enumPackage.Severity;
 import io.github.tlsdla1235.seniormealplan.domain.report.DailyReport;
+import io.github.tlsdla1235.seniormealplan.dto.async.DailyReportGenerationData;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportForWeeklyDto;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportResponseDto;
@@ -12,6 +13,7 @@ import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.DailyReportsForWeeklyReportDto;
 import io.github.tlsdla1235.seniormealplan.repository.DailyReportRepository;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
+import io.github.tlsdla1235.seniormealplan.service.food.MealService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -32,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DailyReportService {
     private final DailyReportRepository dailyReportRepository;
-
+    private final MealService mealService;
 
     public DailyReport createPendingDailyReport(User user, LocalDate reportDate) {
         if (user == null || user.getUserId() == null) {
@@ -107,6 +110,57 @@ public class DailyReportService {
     }
 
     public List<DailyReportsForWeeklyReportDto> getCompletedReportsForLastWeek(User user, LocalDate date) {
+
+        LocalDate lastMonday = date.minusWeeks(1).with(DayOfWeek.MONDAY);
+        LocalDate lastSunday = date.minusWeeks(1).with(DayOfWeek.SUNDAY);
+
+        List<DailyReport> reports = dailyReportRepository
+                .findByUserAndReportDateBetween(user, lastMonday, lastSunday);
+
+        return reports.stream()
+                .map(DailyReportsForWeeklyReportDto::from) // DTO 변환
+                .filter(Objects::nonNull)                  // null이 아닌 것만 필터링
+                .collect(Collectors.toList());             // 리스트로 수집
+    }
+
+    public List<DailyReportForWeeklyDto> getDailyReportBetweenDate(User user, LocalDate startDate, LocalDate endDate) {
+        List<DailyReport> list =dailyReportRepository.findByUserAndReportDateBetween(user, startDate, endDate);
+        return list.stream().map(DailyReportForWeeklyDto::from).collect(Collectors.toList());
+    }
+
+
+    @Transactional
+    public List<DailyReportGenerationData> createPendingReportsInTransaction(List<User> users, LocalDate date) {
+        List<DailyReportGenerationData> generatedDataList = new ArrayList<>();
+
+        for (User user : users) {
+            List<Meal> meals = mealService.findByUserAndMealDateWithFoods(user, date);
+
+            if (meals.isEmpty()) {
+                log.warn("유저 ID: {}는 {}에 식사 기록이 없어 리포트를 생성하지 않습니다.", user.getUserId(), date);
+                continue;
+            }
+
+            DailyReport report = createPendingDailyReport(user, date);
+            user.setLastDailyReportDate(date);
+
+            log.info("유저 ID: {}의 {} 날짜 리포트 생성 완료. Report ID: {}", user.getUserId(), date, report.getReportId());
+            generatedDataList.add(new DailyReportGenerationData(user, meals, report));
+        }
+
+        return generatedDataList;
+    }
+
+
+
+
+    /**
+     * 테스트용 함수 - 원래 로직은 지난주를 검사해야하지만, 테스트를 위해 이번주
+     * @param user
+     * @param date
+     * @return
+     */
+    public List<DailyReportsForWeeklyReportDto> getCompletedReportsForCurrentWeek(User user, LocalDate date) {
         // 2. '지난주'의 월요일과 일요일 날짜 계산
 
         // 지난주 월요일: (오늘 날짜에서 1주일을 뺀 날짜)가 포함된 주의 월요일
@@ -124,12 +178,4 @@ public class DailyReportService {
                 .filter(Objects::nonNull)                  // null이 아닌 것만 필터링
                 .collect(Collectors.toList());             // 리스트로 수집
     }
-
-    public List<DailyReportForWeeklyDto> getDailyReportBetweenDate(User user, LocalDate startDate, LocalDate endDate) {
-        List<DailyReport> list =dailyReportRepository.findByUserAndReportDateBetween(user, startDate, endDate);
-        return list.stream().map(DailyReportForWeeklyDto::from).collect(Collectors.toList());
-    }
-
-
-
 }

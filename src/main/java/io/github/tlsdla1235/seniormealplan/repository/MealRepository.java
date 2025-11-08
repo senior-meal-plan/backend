@@ -22,4 +22,13 @@ public interface MealRepository extends JpaRepository<Meal, Long> {
     List<Meal> findByUserAndMealDateBetweenWithFoods(@Param("user") User user, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     List<Meal> findByUserAndMealDateIn(User user, Collection<LocalDate> dates);
+
+    @Query("SELECT DISTINCT m.user FROM Meal m WHERE m.mealDate = :date")
+    List<User> findDistinctUsersByMealDate(@Param("date") LocalDate date);
+
+    @Query("SELECT DISTINCT m.user FROM Meal m WHERE m.mealDate BETWEEN :startDate AND :endDate")
+    List<User> findDistinctUsersByMealDateBetween(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
