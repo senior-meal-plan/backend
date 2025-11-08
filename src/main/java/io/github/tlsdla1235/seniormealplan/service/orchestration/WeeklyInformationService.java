@@ -51,7 +51,14 @@ public class WeeklyInformationService {
                     return new dtoHell(
                             report.ReportId(),
                             report.date(),
-                            report.Score(),
+                            report.summarizeScore(),
+                            report.basicScore(),
+                            report.macularDegenerationScore(),
+                            report.hypertensionScore(),
+                            report.myocardialInfarctionScore(),
+                            report.sarcopeniaScore(),
+                            report.hyperlipidemiaScore(),
+                            report.boneDiseaseScore(),
                             mealsForDay
                     );
                 })

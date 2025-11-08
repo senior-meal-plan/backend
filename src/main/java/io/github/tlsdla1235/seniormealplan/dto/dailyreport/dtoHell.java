@@ -9,7 +9,14 @@ import java.util.List;
 public record dtoHell(
         Long reportId,
         LocalDate date,
-        BigDecimal score,
+        BigDecimal summarize_score,
+        BigDecimal basicScore,
+        BigDecimal macularDegenerationScore,
+        BigDecimal hypertensionScore,
+        BigDecimal myocardialInfarctionScore,
+        BigDecimal sarcopeniaScore,
+        BigDecimal hyperlipidemiaScore,
+        BigDecimal boneDiseaseScore,
         List<MealImageDto> meals // 그날의 식사 이미지 목록
 ) {
 }

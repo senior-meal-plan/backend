@@ -8,13 +8,27 @@ import java.time.LocalDate;
 public record DailyReportForWeeklyDto(
         Long ReportId,
         LocalDate date,
-        BigDecimal Score
+        BigDecimal summarizeScore,
+        BigDecimal basicScore,
+        BigDecimal macularDegenerationScore,
+        BigDecimal hypertensionScore,
+        BigDecimal myocardialInfarctionScore,
+        BigDecimal sarcopeniaScore,
+        BigDecimal hyperlipidemiaScore,
+        BigDecimal boneDiseaseScore
 ) {
     public static DailyReportForWeeklyDto from(DailyReport dailyReport) {
         return new DailyReportForWeeklyDto(
                 dailyReport.getReportId(),
                 dailyReport.getReportDate(),
-                dailyReport.getSummarizeScore()
+                dailyReport.getSummarizeScore(),
+                dailyReport.getBasicScore(),
+                dailyReport.getMacularDegenerationScore(),
+                dailyReport.getHypertensionScore(),
+                dailyReport.getMyocardialInfarctionScore(),
+                dailyReport.getSarcopeniaScore(),
+                dailyReport.getHyperlipidemiaScore(),
+                dailyReport.getBoneDiseaseScore()
         );
     }
 }
