@@ -17,6 +17,7 @@ import io.github.tlsdla1235.seniormealplan.service.user.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,7 +110,7 @@ public class WeeklyReportService {
         return weeklyReportRepository.findSimpleReportsByUserOrderByWeekEndDesc(user);
     }
 
-
+    @PreAuthorize("@securityService.isReportOwner(#reportId)")
     public GetWeeklyReportDto getReport(Long reportId) {
         WeeklyReport persist =  weeklyReportRepository.findById(reportId)
                 .orElseThrow(() -> new EntityNotFoundException("리포트를 찾을 수 없습니다. ID: " + reportId));

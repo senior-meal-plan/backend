@@ -25,7 +25,7 @@ public class RecipeStep {
     private Long stepNo;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String instruction;
 
     @Column(name = "image_url")

@@ -4,5 +4,7 @@ public enum Severity {
     INFO,    // 정보
     WARNING, // 주의
     ALERT,    // 경고
-    GOOD
+    GOOD,
+    SOSO,
+    BAD
 }

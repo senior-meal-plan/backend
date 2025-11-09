@@ -11,6 +11,7 @@ import io.github.tlsdla1235.seniormealplan.repository.ReportRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,6 +90,7 @@ public class MealReportService {
         }
     }
 
+    @PreAuthorize("@securityService.isMealOwner(#meal.mealId)")
     public MealReportResponseDto getMealReportByMealId(Meal meal) {
         MealReport mealReport = mealReportRepository.findByMeal_MealId(meal.getMealId()).orElseThrow(() -> new EntityNotFoundException("MealReport not found for Meal ID: " + meal.getMealId()));
         MealReportResponseDto responseDto = MealReportResponseDto.fromMealReport(mealReport);
