@@ -64,6 +64,14 @@ public class GenerateDailyReportService {
             return;
         }
 
+
+        log.info("생성된 리포트 데이터 DTO 리스트 상세 (총 {}개):", generatedData.size());
+        for (DailyReportGenerationData data : generatedData) {
+                // DailyReportGenerationData 객체의 toString() 메서드가 호출됩니다.
+                log.info("  - DTO: {}", data);
+            }
+
+
         // 3. [변경] 모든 DB 커밋이 완료된 후, 비동기 서비스에 '배치 리스트' 전달
         reportAsyncService.requestBatchAnalysis(generatedData);
     }
