@@ -26,6 +26,8 @@ public class JwtService {
     private String secret;  // 256비트 이상 권장 (Base64)
     @Value("${jwt.exp-minutes:60}")
     private long expMinutes;
+    @Value("${jwt.rt-exp-days:7}")
+    private long rtExpDays;
 
     private SecretKey secretKey;
 
