@@ -3,6 +3,7 @@ package io.github.tlsdla1235.seniormealplan.controller;
 
 import io.github.tlsdla1235.seniormealplan.dto.auth.AuthResponse;
 import io.github.tlsdla1235.seniormealplan.dto.auth.LoginRequest;
+import io.github.tlsdla1235.seniormealplan.dto.auth.RefreshRequest;
 import io.github.tlsdla1235.seniormealplan.dto.auth.RegisterRequest;
 import io.github.tlsdla1235.seniormealplan.service.user.AuthService;
 import io.github.tlsdla1235.seniormealplan.service.user.UserTopicService;
@@ -41,6 +42,19 @@ public class securityTestController {
         LocalDate date = LocalDate.now();
         log.info("date: {}", date);
         return ResponseEntity.ok(auth.login(req));
+    }
+
+    // ▼ 3. Refresh 엔드포인트 (신규) ▼
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@Valid @RequestBody RefreshRequest req) {
+        try {
+            AuthResponse response = auth.refresh(req.refreshToken());
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException | SecurityException e) {
+            log.warn("Refresh 실패: {}", e.getMessage());
+            // 유효하지 않은 토큰, Redis에 없거나 불일치 시 401 응답
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+        }
     }
 
 
