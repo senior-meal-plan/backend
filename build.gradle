@@ -49,6 +49,9 @@ dependencies {
 
 	// BCrypt
 	implementation 'org.springframework.security:spring-security-crypto'
+
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-cache' // cache 추상화 (보통 redis 스타터에 포함됨)
 }
 
 tasks.named('test') {

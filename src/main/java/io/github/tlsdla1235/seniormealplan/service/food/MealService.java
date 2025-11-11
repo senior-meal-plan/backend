@@ -3,6 +3,7 @@ package io.github.tlsdla1235.seniormealplan.service.food;
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
+import io.github.tlsdla1235.seniormealplan.dto.meal.MealCachedDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealImageDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealResponseDto;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.MealForWeeklyDto;
@@ -11,6 +12,9 @@ import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,51 +32,58 @@ public class MealService {
     private final MealRepository mealRepository;
     private final S3UploadService s3UploadService;
 
-    public List<MealResponseDto> getTodayMeals(User user) {
+
+    @Transactional(readOnly = true)
+    public List<MealCachedDto> getTodayMeals(User user) {
         LocalDate today = LocalDate.now();
-        List<Meal> meals = findByUserAndMealDateWithFoods(user, today);
-        List<MealResponseDto> mealResponseDtos = meals.stream().map(meal->{
-            String presignedUrl = s3UploadService.generatePresignedUrlForGet(meal.getUniqueFileName());
-            return MealResponseDto.from(meal, presignedUrl);
-        }).toList();
-        log.info("사용자 id:{}에 대한 getTodayMeals 결과값: {}", user.getUserId(), mealResponseDtos);
-        return mealResponseDtos;
+        var cached = mealRepository.findByUserAndMealDateWithFoods(user, today)
+                .stream().map(MealCachedDto::from).toList();
+        log.info("Cache Miss 사용자 id:{} todayMeals size={}", user.getUserId(), cached.size());
+        return cached;
     }
 
-    public List<MealResponseDto> getMealsByDate(User user, LocalDate date) {
-        List<Meal> meals = findByUserAndMealDateWithFoods(user, date);
-        List<MealResponseDto> mealResponseDtos = meals.stream().map(meal->{
-            String presignedUrl = s3UploadService.generatePresignedUrlForGet(meal.getUniqueFileName());
-            return MealResponseDto.from(meal, presignedUrl);
-        }).toList();
-        log.info("사용자 id:{}에 대한 getTodayMeals 결과값: {}", user.getUserId(), mealResponseDtos);
-        return mealResponseDtos;
+    @Transactional(readOnly = true)
+    @Cacheable(value = "mealsByDate", key = "#user.userId + '_' + #date",
+            unless = "#result == null || #result.isEmpty()")
+    public List<MealCachedDto> getMealsByDate(User user, LocalDate date) {
+        var cached = mealRepository.findByUserAndMealDateWithFoods(user, date)
+                .stream().map(MealCachedDto::from).toList();
+        log.info("Cache Miss 사용자 id:{} mealsByDate({}) size={}", user.getUserId(), date, cached.size());
+        return cached;
     }
 
     public List<Meal> findByUserAndMealDateWithFoods(User user, LocalDate date) {
         return mealRepository.findByUserAndMealDateWithFoods(user, date);
     }
 
-    public void updateMealWithAnalysis(AnalysisMealResultDto analysisMealResultDto) {
-        Meal meal = mealRepository.findById(analysisMealResultDto.mealId())
-                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 식사 데이터를 찾을 수 없습니다: " + analysisMealResultDto.mealId()));
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "todayMeals",
+                    key = "#result.user.userId",
+                    condition = "#result.mealDate.isEqual(T(java.time.LocalDate).now())"),
+            @CacheEvict(value = "mealsByDate",
+                    key = "#result.user.userId + '_' + #result.mealDate.toString()")
+    })
+    public Meal updateMealWithAnalysis(AnalysisMealResultDto dto) {
+        Meal meal = mealRepository.findById(dto.mealId())
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 식사 데이터를 찾을 수 없습니다: " + dto.mealId()));
 
+        meal.setTotalKcal(dto.totalKcal());
+        meal.setTotalCalcium(dto.totalCalcium());
+        meal.setTotalCarbs(dto.totalCarbs());
+        meal.setTotalProtein(dto.totalProtein());
+        meal.setTotalFat(dto.totalFat());
 
-        meal.setTotalKcal(analysisMealResultDto.totalKcal());
-        meal.setTotalCalcium(analysisMealResultDto.totalCalcium());
-        meal.setTotalCarbs(analysisMealResultDto.totalCarbs());
-        meal.setTotalProtein(analysisMealResultDto.totalProtein());
-        meal.setTotalFat(analysisMealResultDto.totalFat());
-
-        meal.setDairyIntake(analysisMealResultDto.isDairyIntake());
-        meal.setVitaminCIntake(analysisMealResultDto.isVitaminCIntake());
-        meal.setVitaminBIntake(analysisMealResultDto.isVitaminBIntake());
-        meal.setFishIntake(analysisMealResultDto.isFishIntake());
-        meal.setNutsIntake(analysisMealResultDto.isNutsIntake());
-        meal.setVegetableOilIntake(analysisMealResultDto.isVegetableOilIntake());
-        meal.setUnrefinedCarbsIntake(analysisMealResultDto.isUnrefinedCarbsIntake());
+        meal.setDairyIntake(dto.isDairyIntake());
+        meal.setVitaminCIntake(dto.isVitaminCIntake());
+        meal.setVitaminBIntake(dto.isVitaminBIntake());
+        meal.setFishIntake(dto.isFishIntake());
+        meal.setNutsIntake(dto.isNutsIntake());
+        meal.setVegetableOilIntake(dto.isVegetableOilIntake());
+        meal.setUnrefinedCarbsIntake(dto.isUnrefinedCarbsIntake());
 
         log.info("Meal(ID: {}) updated with analysis.", meal.getMealId());
+        return meal; // ★ 중요
     }
 
     public List<LocalDate> getAllMealDateFromUser(User user) {

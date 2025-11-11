@@ -11,7 +11,9 @@ import io.github.tlsdla1235.seniormealplan.repository.HealthTopicRepository;
 import io.github.tlsdla1235.seniormealplan.repository.UserSelectedTopicRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +40,15 @@ public class UserTopicService {
         return combinedList;
     }
 
+    @Transactional
+    @CacheEvict(value = "whoAmI", key = "#user.userId")
     public void deleteByUser(User user) {
         Integer deletedTopicNum = userSelectedTopicRepository.deleteByUser(user);
         log.info("user id :{}에 대해 토픽을 {}개 삭제 하였습니다.", user.getUserId(), deletedTopicNum);
     }
 
+    @Transactional
+    @CacheEvict(value = "whoAmI", key = "#user.userId")
     public void updateUserTopics(User user, UpdateUserDto req)
     {
         List<String> topicNames = req.userSelectedTopic();

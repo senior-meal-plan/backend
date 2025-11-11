@@ -8,7 +8,9 @@ import io.github.tlsdla1235.seniormealplan.repository.AiManagementGoalRepository
 import io.github.tlsdla1235.seniormealplan.repository.HealthTopicRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,8 @@ public class AiManagementGoalService {
         return userTopicDtos;
     }
 
+    @Transactional
+    @CacheEvict(value = "whoAmI", key = "#user.userId")
     public void updateAiSelectedTopics(User user, List<String> aiRecommendTopicNames) {
         if (aiRecommendTopicNames == null) {
             aiRecommendTopicNames = List.of();
@@ -56,6 +60,7 @@ public class AiManagementGoalService {
                 .collect(Collectors.toList());
         aiManagementGoalRepository.saveAll(newGoals);
         log.info("Successfully set {} new AI Management Goals for user: {}", newGoals.size(), user.getUserId());
+        log.info("Cache Evict: AI 토픽 변경, 사용자 id:{}의 'whoAmI' 캐시 삭제", user.getUserId());
     }
 
 }

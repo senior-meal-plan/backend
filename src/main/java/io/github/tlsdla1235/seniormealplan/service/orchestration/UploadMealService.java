@@ -20,6 +20,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -51,6 +53,13 @@ public class UploadMealService {
     }
 
     @Transactional
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "todayMeals", key = "#meal.user.userId",
+                            condition = "#meal.mealDate.isEqual(T(java.time.LocalDate).now())"),
+                    @CacheEvict(value = "mealsByDate", key = "#meal.user.userId + '_' + #meal.mealDate.toString()")
+            }
+    )
     public Meal saveMeal(Meal meal, String uniqueFileName){
         String url = s3UploadService.getFileUrl(uniqueFileName);
         meal.setPhotoUrl(url);

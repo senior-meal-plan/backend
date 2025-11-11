@@ -9,6 +9,8 @@ import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,21 +22,28 @@ public class FoodService {
     private final MealRepository mealRepository;
 
 
-    public void createFoodsFromAnalysisAndLinkToMeal(AnalysisMealResultDto resultDto) {
+    @Transactional // <-- 트랜잭션 추가
+    @Caching(evict = {
+            @CacheEvict(value = "todayMeals",
+                    key = "#result.user.userId",
+                    condition = "#result.mealDate.isEqual(T(java.time.LocalDate).now())"),
+            @CacheEvict(value = "mealsByDate",
+                    key = "#result.user.userId + '_' + #result.mealDate.toString()")
+    })
+    public Meal createFoodsFromAnalysisAndLinkToMeal(AnalysisMealResultDto resultDto) {
         Meal meal = mealRepository.findById(resultDto.mealId())
                 .orElseThrow(() -> new EntityNotFoundException("Meal not found with id: " + resultDto.mealId()));
 
-        // 재분석에 대비하여, 기존에 연결된 Food 목록을 모두 제거합니다.
         meal.getFoods().clear();
 
         if (resultDto.foods() == null || resultDto.foods().isEmpty()) {
             log.warn("No food items found in analysis result for Meal ID: {}", resultDto.mealId());
-            return;
+            return meal; // ← 반환해야 @CacheEvict의 #result 사용 가능
         }
 
         for (AnalyzedFoodDto foodDto : resultDto.foods()) {
             Food newFood = Food.builder()
-                    .meal(meal) // 연관관계 설정
+                    .meal(meal)
                     .name(foodDto.name())
                     .kcal(foodDto.kcal())
                     .protein(foodDto.protein())
@@ -56,6 +65,7 @@ public class FoodService {
             meal.getFoods().add(newFood);
         }
         log.info("{} food items created and linked to Meal ID: {}", meal.getFoods().size(), meal.getMealId());
+        return meal; // ★ 중요
     }
 
 

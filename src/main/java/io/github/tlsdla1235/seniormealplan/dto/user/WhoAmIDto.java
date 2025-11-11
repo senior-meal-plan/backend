@@ -4,6 +4,7 @@ import io.github.tlsdla1235.seniormealplan.domain.User;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.io.Serializable;
 
 public record WhoAmIDto (
         Long userId,
@@ -12,7 +13,7 @@ public record WhoAmIDto (
         BigDecimal userHeight,
         BigDecimal userWeight,
         List<UserTopicDto> toics
-){
+)implements Serializable{
     public static WhoAmIDto from(User user, List<UserTopicDto> topics) {
         return new WhoAmIDto(
                 user.getUserId(),

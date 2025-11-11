@@ -3,10 +3,12 @@ package io.github.tlsdla1235.seniormealplan.controller.meal;
 import io.github.tlsdla1235.seniormealplan.config.JwtAuthFilter;
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
 import io.github.tlsdla1235.seniormealplan.domain.User;
+import io.github.tlsdla1235.seniormealplan.dto.meal.MealCachedDto;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealCreateRequest;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealResponseDto;
 import io.github.tlsdla1235.seniormealplan.dto.s3dto.PresignedUrlRequest;
 import io.github.tlsdla1235.seniormealplan.dto.s3dto.PresignedUrlResponse;
+import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
 import io.github.tlsdla1235.seniormealplan.service.food.MealService;
 import io.github.tlsdla1235.seniormealplan.service.orchestration.UploadMealService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import java.util.List;
 public class MealController {
     private final UploadMealService uploadMealService;
     private final MealService mealService;
+    private final S3UploadService s3UploadService;
 
     @PostMapping("/me/uploads")
     public ResponseEntity<PresignedUrlResponse> generatePresignedUrl(@RequestBody PresignedUrlRequest request)
@@ -51,12 +54,16 @@ public class MealController {
     }
 
     @GetMapping("/me/meals/today")
-    public ResponseEntity<MealResponseDto> getTodayMeals(@AuthenticationPrincipal JwtAuthFilter.JwtPrincipal me)
+    public ResponseEntity<List<MealResponseDto>> getTodayMeals(@AuthenticationPrincipal JwtAuthFilter.JwtPrincipal me)
     {
         User user = User.builder().userId(me.userId()).build();
-        List<MealResponseDto> response= mealService.getTodayMeals(user);
+        List<MealCachedDto> cached= mealService.getTodayMeals(user);
+        List<MealResponseDto> response = cached.stream()
+                .map(c -> MealResponseDto.fromCached(
+                        c, s3UploadService.generatePresignedUrlForGet(c.uniqueFileName())))
+                .toList();
 
-        return !response.isEmpty() ? ResponseEntity.ok().body(response.get(0)) : ResponseEntity.noContent().build();
+        return !response.isEmpty() ? ResponseEntity.ok().body(response) : ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me/meals")
@@ -65,8 +72,11 @@ public class MealController {
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date)
     {
         User user = User.builder().userId(me.userId()).build();
-        List<MealResponseDto> response = mealService.getMealsByDate(user, date);
-
+        List<MealCachedDto> cached = mealService.getMealsByDate(user, date);
+        List<MealResponseDto> response = cached.stream()
+                .map(c -> MealResponseDto.fromCached(
+                        c, s3UploadService.generatePresignedUrlForGet(c.uniqueFileName())))
+                .toList();
         return !response.isEmpty()
                 ? ResponseEntity.ok().body(response) // 리스트 전체 반환
                 : ResponseEntity.noContent().build(); // 데이터가 없을 땐 204 No Content

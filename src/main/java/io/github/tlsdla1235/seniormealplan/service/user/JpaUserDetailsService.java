@@ -2,6 +2,7 @@ package io.github.tlsdla1235.seniormealplan.service.user;
 
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.repository.UserRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -19,6 +20,7 @@ public class JpaUserDetailsService implements UserDetailsService {
     public JpaUserDetailsService(UserRepository repo) { this.repo = repo; }
 
     @Override
+    @Cacheable(value = "userDetails", key = "#userInputId")
     public UserDetails loadUserByUsername(String userInputId) throws UsernameNotFoundException {
         User u = repo.findByUserInputId(userInputId).orElseThrow(() -> new UsernameNotFoundException(userInputId));
         Collection<GrantedAuthority> auth = List.of(new SimpleGrantedAuthority("ROLE_" + u.getRole().name()));
