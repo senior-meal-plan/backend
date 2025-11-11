@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -38,6 +39,18 @@ public class UserBookMarkedRecipeService {
         userBookmarkRecipeRepository.save(userBookmarkedRecipes);
     }
 
+    @Transactional
+    public void deleteUserBookmarkRecipe(User user, Recipe recipe) {
+        Optional<UserBookmarkedRecipe> bookmarkOptional = userBookmarkRecipeRepository.findByUserAndRecipe(user, recipe);
+        if (bookmarkOptional.isPresent()) {
+            userBookmarkRecipeRepository.delete(bookmarkOptional.get());
+            log.info("사용자 id: {}에 대한 레시피 북마크 삭제 완료. recipeId: {}", user.getUserId(), recipe.getRecipeId());
+        } else {
+            log.warn("사용자 id: {}가 북마크하지 않은 레시피(id:{})의 삭제를 시도했습니다.", user.getUserId(), recipe.getRecipeId());
+        }
+    }
+
+    @Transactional(readOnly = true)
     public List<Recipe> findUserBookmarkRecipeByUser(User user)
     {
         return userBookmarkRecipeRepository.findByUser(user).stream().map(UserBookmarkedRecipe::getRecipe).toList();

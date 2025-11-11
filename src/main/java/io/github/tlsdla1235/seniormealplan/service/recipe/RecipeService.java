@@ -5,8 +5,10 @@ import io.github.tlsdla1235.seniormealplan.domain.recipe.Recipe;
 import io.github.tlsdla1235.seniormealplan.domain.recipe.RecipeIngredient;
 import io.github.tlsdla1235.seniormealplan.domain.recipe.RecipeStep;
 import io.github.tlsdla1235.seniormealplan.dto.recipe.RecipeGenerateDto;
+import io.github.tlsdla1235.seniormealplan.dto.recipe.RecipeIngredientDto;
 import io.github.tlsdla1235.seniormealplan.dto.recipe.RecipeResponseDto;
 import io.github.tlsdla1235.seniormealplan.dto.recipe.RecipeStepDto;
+import io.github.tlsdla1235.seniormealplan.repository.recipe.RecipeIngredientRepository;
 import io.github.tlsdla1235.seniormealplan.repository.recipe.RecipeRepository;
 import io.github.tlsdla1235.seniormealplan.repository.recipe.RecipeStepRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class RecipeService {
     private final UserBookMarkedRecipeService userBookMarkedRecipeService;
     private final RecipeRecommendService recipeRecommendService;
     private final RecipeStepRepository recipeStepRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
 
     @Transactional
     public void save(RecipeGenerateDto dto) {
@@ -80,6 +83,19 @@ public class RecipeService {
         List<RecipeStep> steps = recipeStepRepository.findByRecipe_RecipeIdOrderByStepNoAsc(recipe.getRecipeId());
         List<RecipeStepDto> dtos = steps.stream().map(RecipeStepDto::from).collect(Collectors.toList());
         log.info("recipe id:{}에 대한 레시피 순서 조회:{}", recipe.getRecipeId(), dtos);
+        return dtos;
+    }
+
+    public List<RecipeIngredientDto> getRecipeIngredients(Long recipeId) {
+        // Repository를 사용하여 recipeId로 재료 목록 조회
+        List<RecipeIngredient> ingredients = recipeIngredientRepository.findByRecipe_RecipeId(recipeId);
+
+        // Entity 리스트를 DTO 리스트로 변환
+        List<RecipeIngredientDto> dtos = ingredients.stream()
+                .map(RecipeIngredientDto::from)
+                .collect(Collectors.toList());
+
+        log.info("recipe id:{}에 대한 레시피 재료 조회:{}", recipeId, dtos);
         return dtos;
     }
 

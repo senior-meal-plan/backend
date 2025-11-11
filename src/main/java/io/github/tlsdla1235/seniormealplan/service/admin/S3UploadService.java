@@ -80,22 +80,15 @@ public class S3UploadService {
      * @return Pre-signed URL과 S3에 저장될 고유 파일 이름이 담긴 DTO
      */
     public PresignedUrlResponse generatePresignedUrl(String originalFileName) {
-        // 1. S3에 저장될 파일 이름이 중복되지 않도록 고유한 이름을 생성합니다.
         String uniqueFileName = createUniqueFileName(originalFileName);
-
-        // 2. URL의 유효 시간을 설정합니다. (여기서는 5분으로 설정)
         Date expiration = new Date();
         long expTimeMillis = expiration.getTime();
         expTimeMillis += 1000 * 60 * 5; // 5분
         expiration.setTime(expTimeMillis);
-
-        // 3. AWS SDK를 사용하여 Pre-signed URL 생성 요청을 만듭니다.
         GeneratePresignedUrlRequest presignedUrlRequest =
                 new GeneratePresignedUrlRequest(bucket, uniqueFileName)
                         .withMethod(HttpMethod.PUT) // PUT 메서드로 업로드하도록 지정
                         .withExpiration(expiration);
-
-        // 4. URL을 생성하고 DTO에 담아 반환합니다.
         URL url = amazonS3Client.generatePresignedUrl(presignedUrlRequest);
         log.info("Pre-signed URL for {} generated: {}", uniqueFileName, url);
 
