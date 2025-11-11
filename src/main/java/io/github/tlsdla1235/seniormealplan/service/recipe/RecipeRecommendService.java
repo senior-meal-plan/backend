@@ -65,12 +65,14 @@ public class RecipeRecommendService {
             // 건강 목표 있음
             if (!allergenNames.isEmpty()) {
                 log.info("추천(Goals=Y, Allergens=Y) 실행. 알러지: {}", allergenNames.size());
-                recommendedIds = recipeRepository.findRecommendedRecipeIdsByGoalsExcludingAllergens(
-                        healthGoalNames, allergenNames, top10
-                );
+                long goalCount = healthGoalNames.size();
+                recommendedIds = recipeRepository
+                        .findRecommendedRecipeIdsByGoalsExcludingAllergens_AnyGoal(
+                                healthGoalNames, allergenNames, top10
+                        );
             } else {
                 log.info("추천(Goals=Y, Allergens=N) 실행.");
-                recommendedIds = recipeRepository.findRecommendedRecipeIdsByGoalsOnly(
+                recommendedIds = recipeRepository.findRecommendedRecipeIdsByGoalsOnly_AnyGoal(
                         healthGoalNames, top10
                 );
             }
@@ -78,7 +80,7 @@ public class RecipeRecommendService {
             // 건강 목표 없음
             if (!allergenNames.isEmpty()) {
                 log.info("추천(Goals=N, Allergens=Y) 실행. 알러지: {}", allergenNames.size());
-                recommendedIds = recipeRepository.findTopRecipeIdsExcludingAllergens(
+                recommendedIds = recipeRepository.findTopRecipeIdsExcludingAllergens_NotExists(
                         allergenNames, top10
                 );
             } else {
