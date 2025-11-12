@@ -12,7 +12,8 @@ public record WhoAmIDto (
         Integer age,
         BigDecimal userHeight,
         BigDecimal userWeight,
-        List<UserTopicDto> toics
+        String Gender,
+        List<UserTopicDto> topics
 )implements Serializable{
     public static WhoAmIDto from(User user, List<UserTopicDto> topics) {
         return new WhoAmIDto(
@@ -21,6 +22,7 @@ public record WhoAmIDto (
                 user.getAge(),
                 user.getUserHeight(),
                 user.getUserWeight(),
+                user.getUserGender().name(),
                 topics
         );
     }
