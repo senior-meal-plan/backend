@@ -2,9 +2,11 @@ package io.github.tlsdla1235.seniormealplan.controller.report;
 
 import io.github.tlsdla1235.seniormealplan.config.JwtAuthFilter;
 import io.github.tlsdla1235.seniormealplan.domain.User;
+import io.github.tlsdla1235.seniormealplan.dto.async.WeeklyReportGenerationData;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.dtoHell;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.GetWeeklyReportDto;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.SimpleWeeklyReportDto;
+import io.github.tlsdla1235.seniormealplan.service.orchestration.GenerateWeeklyReportsService;
 import io.github.tlsdla1235.seniormealplan.service.orchestration.WeeklyInformationService;
 import io.github.tlsdla1235.seniormealplan.service.report.WeeklyReportService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,7 @@ import java.util.List;
 public class WeeklyReportController {
     private final WeeklyReportService weeklyReportService;
     private final WeeklyInformationService weeklyInformationService;
-
+    private final GenerateWeeklyReportsService generateWeeklyReportsService;
 
     @GetMapping("/dates")
     public ResponseEntity<List<SimpleWeeklyReportDto>> getAllWRDateFromUser(@AuthenticationPrincipal JwtAuthFilter.JwtPrincipal me)
@@ -51,6 +53,14 @@ public class WeeklyReportController {
                 endDate
         );
         return ResponseEntity.ok(dailySummaries);
+    }
+
+    @GetMapping("/test/createWeeklyReport")
+    public ResponseEntity<WeeklyReportGenerationData> testCreate(@AuthenticationPrincipal JwtAuthFilter.JwtPrincipal me,
+                                                                 @RequestParam("Date") LocalDate Date)
+    {
+        WeeklyReportGenerationData res = generateWeeklyReportsService.generateWeeklyReportsForTest(User.builder().userId(me.userId()).build(), Date);
+        return ResponseEntity.ok(res);
     }
 
 }

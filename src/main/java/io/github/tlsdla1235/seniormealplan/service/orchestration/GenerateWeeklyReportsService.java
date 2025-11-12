@@ -114,6 +114,12 @@ public class GenerateWeeklyReportsService {
         aiManagementGoalService.updateAiSelectedTopics(user, resultDto.aiRecommendTopic());
         recipeRecommendService.createWeeklyRecommendations(user, resultDto);
     }
+
+    @Transactional
+    public WeeklyReportGenerationData generateWeeklyReportsForTest(User user, LocalDate startDate){
+        log.info("테스트용 주간 리포트 배치 작업 시작. 대상 기간: {}의 이전주 월요일 부터 일요일", startDate);
+        return weeklyReportService.createWeeklyReportsForTest(user, startDate);
+    }
 }
 
 

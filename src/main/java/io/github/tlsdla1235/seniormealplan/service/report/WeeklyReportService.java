@@ -102,6 +102,35 @@ public class WeeklyReportService {
     }
 
 
+    @Transactional
+    public WeeklyReportGenerationData createWeeklyReportsForTest(
+            User user, LocalDate referenceDate) {
+
+        List<WeeklyReportGenerationData> generatedDataList = new ArrayList<>();
+        LocalDate lastWeekDate = referenceDate.minusWeeks(1);
+
+        log.info("유저 ID: {}의 주간 리포트 생성 시작", user.getUserId());
+
+        WhoAmIDto userdto = userService.whoAmI(user);
+        List<DailyReportsForWeeklyReportDto> dailyReportDto =
+                    dailyReportService.getCompletedReportsForLastWeek(user, referenceDate);
+        List<MealForWeeklyDto> mealsDto =
+                mealService.getMealsForLastWeek(user, referenceDate);
+
+            if (dailyReportDto.isEmpty() && mealsDto.isEmpty()) {
+                log.info("유저 ID: {}는 지난주 식사/데일리 리포트 기록이 없어 주간 리포트를 생성하지 않습니다.", user.getUserId());
+            }
+
+            WeeklyReport newReport = createPendingWeeklyReport(user, lastWeekDate);
+
+            generatedDataList.add(new WeeklyReportGenerationData(
+                    user, newReport, userdto, dailyReportDto, mealsDto
+            ));
+
+        return generatedDataList.get(0);
+    }
+
+
     /**
      * 이 아래로 유저가 사용하는 조회
      *

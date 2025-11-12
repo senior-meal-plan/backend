@@ -2,10 +2,7 @@ package io.github.tlsdla1235.seniormealplan.service.food;
 
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
 import io.github.tlsdla1235.seniormealplan.domain.User;
-import io.github.tlsdla1235.seniormealplan.dto.meal.AnalysisMealResultDto;
-import io.github.tlsdla1235.seniormealplan.dto.meal.MealCachedDto;
-import io.github.tlsdla1235.seniormealplan.dto.meal.MealImageDto;
-import io.github.tlsdla1235.seniormealplan.dto.meal.MealResponseDto;
+import io.github.tlsdla1235.seniormealplan.dto.meal.*;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.MealForWeeklyDto;
 import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
 import io.github.tlsdla1235.seniormealplan.service.admin.S3UploadService;
@@ -127,12 +124,12 @@ public class MealService {
         return mealDtos;
     }
 
-    public List<MealImageDto> findByUserAndMealDateIn(User user, Collection<LocalDate> dates)
+    public List<MealImageWithFoodNameDto> findByUserAndMealDateIn(User user, Collection<LocalDate> dates)
     {
         List<Meal> meals = mealRepository.findByUserAndMealDateIn(user, dates);
         return meals.stream().map(meal->{
             String presignedUrl = s3UploadService.generatePresignedUrlForGet(meal.getUniqueFileName());
-            return MealImageDto.fromMeal(meal, presignedUrl);
+            return MealImageWithFoodNameDto.fromMeal(meal, presignedUrl);
         }).toList();
 
     }

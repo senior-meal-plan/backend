@@ -6,6 +6,7 @@ import io.github.tlsdla1235.seniormealplan.domain.report.DailyReport;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportForWeeklyDto;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.dtoHell;
 import io.github.tlsdla1235.seniormealplan.dto.meal.MealImageDto;
+import io.github.tlsdla1235.seniormealplan.dto.meal.MealImageWithFoodNameDto;
 import io.github.tlsdla1235.seniormealplan.repository.DailyReportRepository;
 import io.github.tlsdla1235.seniormealplan.repository.MealRepository;
 import io.github.tlsdla1235.seniormealplan.service.food.MealService;
@@ -40,14 +41,14 @@ public class WeeklyInformationService {
         List<LocalDate> reportedDates = dailyReports.stream()
                 .map(DailyReportForWeeklyDto::date)
                 .toList();
-        List<MealImageDto> meals = mealService.findByUserAndMealDateIn(user, reportedDates);
+        List<MealImageWithFoodNameDto> meals = mealService.findByUserAndMealDateIn(user, reportedDates);
         log.info("ResponseBetweenDates에서 meals 결과값 {}", meals);
-        Map<LocalDate, List<MealImageDto>> mealsByDateMap = meals.stream()
-                .collect(Collectors.groupingBy(MealImageDto::date));
+        Map<LocalDate, List<MealImageWithFoodNameDto>> mealsByDateMap = meals.stream()
+                .collect(Collectors.groupingBy(MealImageWithFoodNameDto::date));
 
         return dailyReports.stream()
                 .map(report -> {
-                    List<MealImageDto> mealsForDay = mealsByDateMap.getOrDefault(report.date(), Collections.emptyList());
+                    List<MealImageWithFoodNameDto> mealsForDay = mealsByDateMap.getOrDefault(report.date(), Collections.emptyList());
                     return new dtoHell(
                             report.ReportId(),
                             report.date(),
