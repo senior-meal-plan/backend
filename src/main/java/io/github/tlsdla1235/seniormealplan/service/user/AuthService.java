@@ -134,19 +134,16 @@ public class AuthService {
     }
 
     public AuthResponse refresh(String refreshToken) {
-        // 1. RT 검증
+        // RT 검증
         if (refreshToken == null || !jwt.isValid(refreshToken)) {
             throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
         }
-
         //  RT에서 UserId 추출
         String userIdStr = jwt.extractSubject(refreshToken);
         String redisKey = "RT:" + userIdStr;
-
         // Redis에 저장된 RT 조회
         ValueOperations<String, String> vOps = redisTemplate.opsForValue();
         String storedRt = vOps.get(redisKey);
-
         // Redis의 RT와 비교
         if (storedRt == null) {
             throw new SecurityException("Refresh Token이 Redis에 존재하지 않습니다. (로그아웃됨)");
@@ -156,8 +153,7 @@ public class AuthService {
         }
         User u = repo.findById(Long.parseLong(userIdStr))
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자"));
-
-        //새 AT 생성 (RT는 재사용 또는 재발급 - 여기선 재발급(Rotation)
+        //새 AT 생성
         String newAccessToken = jwt.generateAccessToken(
                 userIdStr,
                 Map.of(
@@ -166,14 +162,10 @@ public class AuthService {
                         "role", u.getRole().name()
                 )
         );
-
-        // ★ 7. (보안강화) Refresh Token Rotation: RT도 새로 발급
         String newRefreshToken = jwt.generateRefreshToken(userIdStr);
         vOps.set(redisKey, newRefreshToken, rtExpDays, TimeUnit.DAYS); // Redis에 새 RT 덮어쓰기
 
         log.info("RT 갱신 완료: UserID={}", userIdStr);
-
-        // 8. 새 토큰 세트 반환
         return new AuthResponse(newAccessToken, newRefreshToken);
     }
 

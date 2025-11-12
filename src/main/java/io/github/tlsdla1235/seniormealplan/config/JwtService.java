@@ -45,7 +45,7 @@ public class JwtService {
                 .compact();
     }
 
-    // ▼ 2. Refresh Token 생성 (Claims 없이 Subject만 사용)
+    // Refresh Token 생성
     public String generateRefreshToken(String subject) {
         var now = Instant.now();
         return Jwts.builder()

@@ -34,6 +34,7 @@ public class MealService {
 
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "todayMeals", key = "#user.userId + '_' + T(java.time.LocalDate).now().toString()")
     public List<MealCachedDto> getTodayMeals(User user) {
         LocalDate today = LocalDate.now();
         var cached = mealRepository.findByUserAndMealDateWithFoods(user, today)
@@ -83,7 +84,7 @@ public class MealService {
         meal.setUnrefinedCarbsIntake(dto.isUnrefinedCarbsIntake());
 
         log.info("Meal(ID: {}) updated with analysis.", meal.getMealId());
-        return meal; // ★ 중요
+        return meal; // 중요
     }
 
     public List<LocalDate> getAllMealDateFromUser(User user) {
