@@ -7,13 +7,15 @@ import java.time.LocalDate;
 public record MealImageDto(
         Long mealId,
         String photoUrl,
-        LocalDate date
+        LocalDate date,
+        String MealType
 ) {
     public static MealImageDto fromMeal(Meal meal, String presingedUrl) {
         return new MealImageDto(
                 meal.getMealId(),
                 presingedUrl,
-                meal.getMealDate()
+                meal.getMealDate(),
+                meal.getMealType().name()
         );
     }
 }
