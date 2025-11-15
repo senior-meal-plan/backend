@@ -26,15 +26,15 @@ public class WeeklyReport extends Report {
     private LocalDate weekEnd;
 
     @Lob
-    @Column(name = "summary_good_point")
+    @Column(name = "summary_good_point", columnDefinition = "TEXT")
     private String summaryGoodPoint;
 
     @Lob
-    @Column(name = "summary_bad_point")
+    @Column(name = "summary_bad_point", columnDefinition = "TEXT")
     private String summaryBadPoint;
 
     @Lob
-    @Column(name = "summary_ai_recommand")
+    @Column(name = "summary_ai_recommand", columnDefinition = "TEXT")
     private String summaryAiRecommand;
 
     @Enumerated(EnumType.STRING)
