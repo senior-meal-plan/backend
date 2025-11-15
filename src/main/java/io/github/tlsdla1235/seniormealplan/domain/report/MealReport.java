@@ -19,6 +19,7 @@ public class MealReport extends Report {
     private Meal meal;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String summary;
 
     @Enumerated(EnumType.STRING)

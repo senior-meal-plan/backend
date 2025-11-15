@@ -33,7 +33,7 @@ public class DailyReport extends Report {
     private BigDecimal totalCalcium;
 
     @Lob
-    @Column(name = "summary")
+    @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 
     @Enumerated(EnumType.STRING)
