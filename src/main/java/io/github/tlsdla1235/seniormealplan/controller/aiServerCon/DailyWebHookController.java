@@ -1,5 +1,6 @@
 package io.github.tlsdla1235.seniormealplan.controller.aiServerCon;
 
+import io.github.tlsdla1235.seniormealplan.dto.async.DailyReportGenerationData;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisRequestDto;
 import io.github.tlsdla1235.seniormealplan.dto.dailyreport.DailyReportAnalysisResultDto;
 import io.github.tlsdla1235.seniormealplan.service.orchestration.GenerateDailyReportService;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -25,8 +28,13 @@ public class DailyWebHookController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/dtoCheckApi")
+    @PostMapping("/dtoCheckApiNot")
     public ResponseEntity<String> check(@RequestBody DailyReportAnalysisRequestDto dto){
+        return ResponseEntity.ok().body("good");
+    }
+
+    @PostMapping("/dtoCheckApi2")
+    public ResponseEntity<String> check(@RequestBody List<DailyReportGenerationData> dto){
         return ResponseEntity.ok().body("good");
     }
 

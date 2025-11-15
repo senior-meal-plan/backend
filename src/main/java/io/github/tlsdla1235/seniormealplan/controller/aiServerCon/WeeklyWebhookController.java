@@ -3,6 +3,7 @@ package io.github.tlsdla1235.seniormealplan.controller.aiServerCon;
 import com.amazonaws.Response;
 import io.github.tlsdla1235.seniormealplan.config.JwtAuthFilter;
 import io.github.tlsdla1235.seniormealplan.domain.User;
+import io.github.tlsdla1235.seniormealplan.dto.async.WeeklyReportGenerationData;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.AnalysisResultDto.WeeklyAnalysisResultDto;
 import io.github.tlsdla1235.seniormealplan.dto.weeklyreport.WeeklyReportGenerateRequestDto;
 import io.github.tlsdla1235.seniormealplan.service.orchestration.GenerateWeeklyReportsService;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,12 +31,17 @@ public class WeeklyWebhookController {
     }
 
 
-    @PostMapping("/dtoCheckApi")
+    @PostMapping("/dtoCheckApiNot")
     public ResponseEntity<String> check(@RequestBody WeeklyReportGenerateRequestDto requestDto)
     {
         return ResponseEntity.ok("Success");
     }
 
+    @PostMapping("/dtoCheckApi2")
+    public ResponseEntity<String> check(@RequestBody List<WeeklyReportGenerationData> requestDto)
+    {
+        return ResponseEntity.ok("Success");
+    }
 
     @PostMapping("/testCode")
     public ResponseEntity<String> test(@AuthenticationPrincipal JwtAuthFilter.JwtPrincipal me)
@@ -41,5 +49,8 @@ public class WeeklyWebhookController {
         generateWeeklyReportsService.createRequestDto(User.builder().userId(me.userId()).build());
         return ResponseEntity.ok("Success");
     }
+
+
+
 
 }
