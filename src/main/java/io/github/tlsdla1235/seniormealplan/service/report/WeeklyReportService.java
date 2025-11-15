@@ -88,13 +88,19 @@ public class WeeklyReportService {
                 log.info("유저 ID: {}는 지난주 식사/데일리 리포트 기록이 없어 주간 리포트를 생성하지 않습니다.", user.getUserId());
                 continue;
             }
-
+            User userForReport = new User();
+            userForReport.setUserId(user.getUserId());
+            userForReport.setUserGender(user.getUserGender());
+            userForReport.setAge(user.getAge());
+            userForReport.setUserInputId(user.getUserInputId());
+            userForReport.setUserName(user.getUserName());
+            userForReport.setUserHeight(user.getUserHeight());
             // 2. 주간 리포트(껍데기) 생성
             WeeklyReport newReport = createPendingWeeklyReport(user, lastWeekDate);
 
             // 3. 비동기 요청에 필요한 데이터 패키징
             generatedDataList.add(new WeeklyReportGenerationData(
-                    user, newReport, userdto, dailyReportDto, mealsDto
+                    userForReport, newReport, userdto, dailyReportDto, mealsDto
             ));
         }
 
