@@ -25,8 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Service
@@ -119,6 +121,43 @@ public class GenerateWeeklyReportsService {
     public WeeklyReportGenerationData generateWeeklyReportsForTest(User user, LocalDate startDate){
         log.info("테스트용 주간 리포트 배치 작업 시작. 대상 기간: {}의 이전주 월요일 부터 일요일", startDate);
         return weeklyReportService.createWeeklyReportsForTest(user, startDate);
+    }
+
+    public List<WeeklyReportGenerationData> generateWeeklyReportsBatchTest() {
+        ZoneId seoulZone = ZoneId.of("Asia/Seoul");
+        LocalDate today = LocalDate.now(seoulZone); // (오늘 = 월요일)
+
+        // 1. '지난주'의 시작(월)과 끝(일) 날짜 계산
+        LocalDate lastWeekMonday = today.minusDays(7);
+        LocalDate lastWeekSunday = today.minusDays(1);
+
+        LocalDate thisWeekMonday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate thisWeekSunday = thisWeekMonday.plusDays(6);
+
+        log.info("주간 리포트 배치 작업 시작. 대상 기간: {} ~ {}", thisWeekMonday, thisWeekSunday);
+
+        // 2. [필수] 지난주에 식사 기록이 있는 유저 조회
+        // (MealService/Repository에 findUsersWithMealsBetweenDates 추가 필요)
+        List<User> usersToReport =
+                mealService.findUsersWithMealsBetweenDates(thisWeekMonday, thisWeekSunday);
+
+        if (usersToReport.isEmpty()) {
+            log.info("배치 작업: 지난주({})에 식사 기록이 있는 유저가 없습니다.", thisWeekSunday);
+            return null;
+        }
+        log.info("배치 작업: 총 {}명의 유저에 대한 주간 리포트를 생성합니다.", usersToReport.size());
+
+        // 3. 트랜잭션 메서드를 호출하여 모든 리포트 '먼저' 생성
+        // (today를 기준으로 전달하면 내부에서 '지난주'를 계산함)
+        List<WeeklyReportGenerationData> generatedData =weeklyReportService.createPendingWeeklyReportsInTransaction(usersToReport, thisWeekSunday);
+
+        if (generatedData.isEmpty()) {
+            log.info("배치 작업: 생성된 리포트가 없어 API 호출을 생략합니다.");
+            return null;
+        }
+        System.out.println("-----------------");
+        System.out.println(generatedData);
+        return generatedData;
     }
 }
 

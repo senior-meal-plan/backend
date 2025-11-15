@@ -10,10 +10,7 @@ import io.github.tlsdla1235.seniormealplan.service.orchestration.GenerateWeeklyR
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -50,7 +47,12 @@ public class WeeklyWebhookController {
         return ResponseEntity.ok("Success");
     }
 
-
+    @GetMapping("/test")
+    public ResponseEntity<List<WeeklyReportGenerationData>> testt()
+    {
+        List<WeeklyReportGenerationData> temp = generateWeeklyReportsService.generateWeeklyReportsBatchTest();
+        return ResponseEntity.ok(temp);
+    }
 
 
 }
