@@ -157,6 +157,7 @@ public class GenerateWeeklyReportsService {
         }
         System.out.println("-----------------");
         System.out.println(generatedData);
+        reportAsyncService.requestWeeklyBatchAnalysis(generatedData);
         return generatedData;
     }
 }
