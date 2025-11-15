@@ -28,6 +28,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,12 +68,8 @@ public class GenerateDailyReportService {
 
         log.info("생성된 리포트 데이터 DTO 리스트 상세 (총 {}개):", generatedData.size());
         for (DailyReportGenerationData data : generatedData) {
-                // DailyReportGenerationData 객체의 toString() 메서드가 호출됩니다.
                 log.info("  - DTO: {}", data);
             }
-
-
-        // 3. [변경] 모든 DB 커밋이 완료된 후, 비동기 서비스에 '배치 리스트' 전달
         reportAsyncService.requestBatchAnalysis(generatedData);
     }
 
@@ -108,5 +105,32 @@ public class GenerateDailyReportService {
         log.info("========== 스케줄 테스트 ==========");
         log.info("현재 시간 오후 11시 30분, 디버깅 메시지 출력 성공!: {}", time);
         log.info("===================================");
+    }
+
+    @Transactional
+    public void generateDailyReportsBatchTest(LocalDate date) {
+
+        log.info("데일리 리포트 배치 작업 시작. 대상 날짜: {}", date);
+        // 1. 어제 식사한 유저 조회
+        List<User> usersToReport = mealService.findUsersWithMealsOnDate(date);
+        if (usersToReport.isEmpty()) {
+            log.info("배치 작업: {} 날짜에 식사 기록이 있는 유저가 없습니다.", date);
+            return;
+        }
+        log.info("배치 작업: 총 {}명의 유저에 대한 리포트를 생성합니다.", usersToReport.size());
+        // 2. [변경] 트랜잭션 메서드를 호출하여 모든 리포트를 '먼저' 생성
+        List<DailyReportGenerationData> generatedData = dailyReportService.createPendingReportsInTransaction(usersToReport, date);
+
+        if (generatedData.isEmpty()) {
+            log.info("배치 작업: 생성된 리포트가 없어 API 호출을 생략합니다.");
+            return;
+        }
+
+
+        log.info("생성된 리포트 데이터 DTO 리스트 상세 (총 {}개):", generatedData.size());
+        for (DailyReportGenerationData data : generatedData) {
+            log.info("  - DTO: {}", data);
+        }
+        reportAsyncService.requestBatchAnalysis(generatedData);
     }
 }

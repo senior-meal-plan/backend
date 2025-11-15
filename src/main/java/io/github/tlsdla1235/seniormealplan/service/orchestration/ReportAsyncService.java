@@ -1,6 +1,8 @@
 package io.github.tlsdla1235.seniormealplan.service.orchestration;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.tlsdla1235.seniormealplan.domain.Meal;
 import io.github.tlsdla1235.seniormealplan.domain.User;
 import io.github.tlsdla1235.seniormealplan.domain.report.DailyReport;
@@ -32,6 +34,8 @@ import java.util.stream.Collectors;
 public class ReportAsyncService {
     private final WebClient webClient;
     private final UserService userService;
+
+    private final ObjectMapper objectMapper;
 
     @Value("${service.webhook.callback-url}")
     private String webhookCallbackUrl;
@@ -86,6 +90,13 @@ public class ReportAsyncService {
         List<DailyReportAnalysisRequestDto> dtoList = reportDataList.stream()
                 .map(this::convertDataToRequestDto)
                 .collect(Collectors.toList());
+
+        try {
+            String jsonBody = objectMapper.writeValueAsString(dtoList);
+            log.info("FastAPI로 전송될 실제 Request Body (JSON): \n{}", jsonBody);
+        } catch (JsonProcessingException e) {
+            log.warn("Request DTO를 JSON으로 변환하는 데 실패했습니다.", e);
+        }
 
         // 2. [핵심] API에 'DTO 리스트'를 단일 요청으로 전송
         webClient.post()
@@ -153,13 +164,22 @@ public class ReportAsyncService {
             log.info("분석 요청할 주간 리포트 배치가 없습니다.");
             return;
         }
-
+        log.info("----------------------");
+        log.info("{}",reportDataList.get(0).toString());
+        log.info("----------------------");
         log.info("총 {}건의 주간 리포트 배치 분석을 비동기로 요청합니다.", reportDataList.size());
 
         // 1. DTO 리스트 변환
         List<WeeklyReportGenerateRequestDto> dtoList = reportDataList.stream()
                 .map(this::convertDataToWeeklyRequestDto) // 헬퍼 메서드 사용
                 .collect(Collectors.toList());
+
+        try {
+            String jsonBody = objectMapper.writeValueAsString(dtoList);
+            log.info("FastAPI(주간)로 전송될 실제 Request Body (JSON): \n{}", jsonBody);
+        } catch (JsonProcessingException e) {
+            log.warn("Request DTO(주간)를 JSON으로 변환하는 데 실패했습니다.", e);
+        }
 
         // 2. [핵심] API에 'DTO 리스트'를 단일 요청으로 전송
         webClient.post()

@@ -7,11 +7,9 @@ import io.github.tlsdla1235.seniormealplan.service.orchestration.GenerateDailyRe
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -38,4 +36,10 @@ public class DailyWebHookController {
         return ResponseEntity.ok().body("good");
     }
 
+    @GetMapping("/testByDate")
+    public ResponseEntity<String> testByDate(@RequestParam LocalDate startDate)
+    {
+        generateDailyReportService.generateDailyReportsBatchTest(startDate);
+        return ResponseEntity.ok().body("good");
+    }
 }

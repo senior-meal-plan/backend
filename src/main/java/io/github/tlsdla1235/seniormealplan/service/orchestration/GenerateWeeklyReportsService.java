@@ -123,6 +123,7 @@ public class GenerateWeeklyReportsService {
         return weeklyReportService.createWeeklyReportsForTest(user, startDate);
     }
 
+    @Transactional
     public List<WeeklyReportGenerationData> generateWeeklyReportsBatchTest() {
         ZoneId seoulZone = ZoneId.of("Asia/Seoul");
         LocalDate today = LocalDate.now(seoulZone); // (오늘 = 월요일)
@@ -148,15 +149,14 @@ public class GenerateWeeklyReportsService {
         log.info("배치 작업: 총 {}명의 유저에 대한 주간 리포트를 생성합니다.", usersToReport.size());
 
         // 3. 트랜잭션 메서드를 호출하여 모든 리포트 '먼저' 생성
-        // (today를 기준으로 전달하면 내부에서 '지난주'를 계산함)
-        List<WeeklyReportGenerationData> generatedData =weeklyReportService.createPendingWeeklyReportsInTransaction(usersToReport, thisWeekSunday);
+        List<WeeklyReportGenerationData> generatedData =weeklyReportService.createPendingWeeklyReportsInTransaction(usersToReport, thisWeekSunday.plusDays(7));
 
         if (generatedData.isEmpty()) {
             log.info("배치 작업: 생성된 리포트가 없어 API 호출을 생략합니다.");
             return null;
         }
         System.out.println("-----------------");
-        System.out.println(generatedData);
+        System.out.println(thisWeekSunday);
         reportAsyncService.requestWeeklyBatchAnalysis(generatedData);
         return generatedData;
     }
