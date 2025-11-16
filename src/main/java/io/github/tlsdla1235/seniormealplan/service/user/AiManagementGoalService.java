@@ -31,7 +31,6 @@ public class AiManagementGoalService {
         return userTopicDtos;
     }
 
-    @Transactional
     @CacheEvict(value = "whoAmI", key = "#user.userId")
     public void updateAiSelectedTopics(User user, List<String> aiRecommendTopicNames) {
         if (aiRecommendTopicNames == null) {
@@ -39,7 +38,6 @@ public class AiManagementGoalService {
         }
         log.info("Updating AI Management Goals for user: {}. New topics: {}", user.getUserId(), aiRecommendTopicNames);
         aiManagementGoalRepository.deleteAllByUser(user);
-        aiManagementGoalRepository.flush();
         List<HealthTopic> foundTopics = healthTopicRepository.findByNameIn(aiRecommendTopicNames);
         if (foundTopics.size() != aiRecommendTopicNames.size()) {
             List<String> foundNames = foundTopics.stream().map(HealthTopic::getName).toList();
