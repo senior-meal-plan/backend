@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -108,7 +109,7 @@ public class GenerateWeeklyReportsService {
         reportAsyncService.requestWeeklyBatchAnalysis(generatedData);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateWeeklyResult(WeeklyAnalysisResultDto resultDto)
     {
         User user = User.builder().userId(resultDto.UserId()).build();

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class AiManagementGoalService {
         return userTopicDtos;
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CacheEvict(value = "whoAmI", key = "#user.userId")
     public void updateAiSelectedTopics(User user, List<String> aiRecommendTopicNames) {
         if (aiRecommendTopicNames == null) {
