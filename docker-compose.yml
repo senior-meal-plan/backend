@@ -3,7 +3,6 @@ version: "3.8"
 services:
   spring-app:
     build: .
-    container_name: senior-meal-spring
     ports:
       # EC2(Host)의 8080 포트와 컨테이너의 8080 포트를 연결
       - "8080:8080"
@@ -18,7 +17,6 @@ services:
   redis:
     # 공식 Redis 이미지 사용
     image: "redis:7-alpine"
-    container_name: senior-meal-redis
     volumes:
       # Redis 데이터를 EC2 호스트에 저장 (컨테이너 삭제돼도 데이터 유지)
       - redis-data:/data
